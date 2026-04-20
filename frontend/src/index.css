@@ -14,6 +14,15 @@
     /* This is the secret sauce to making it stick globally without extra classes */
     --font-sans: var(--font-sharp);
     --default-font-family: var(--font-sharp);
+
+    --color-accent: var(--color-sky-400);
+    --color-accent-glow: rgba(56, 189, 248, 0.4);
+    /* Sky-400 with opacity */
+}
+.accent-pink {
+    --color-accent: var(--color-pink-400);
+    --color-accent-glow: rgba(133, 58, 97, 0.4);
+    /* Pink-400 with opacity */
 }
 /* You can still use standard CSS variables for logic if you prefer */
 :root {

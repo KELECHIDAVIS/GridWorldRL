@@ -7,3 +7,5 @@ export const Algorithm = {
 
 // This creates a type that only allows 0, 1, or 2
 export type AlgorithmType = typeof Algorithm[keyof typeof Algorithm];
+
+export type SimulationMode = 'training' | 'editing';
