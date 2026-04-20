@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+    /* Colors */
+    --color-theme-bg: var(--color-zinc-950);
+    --color-theme-panel: var(--color-zinc-900);
+    --color-theme-text: var(--color-zinc-300);
+    --color-theme-border: var(--color-zinc-800);
+
+    /* 1. Define your sharp stack */
+    --font-sharp: "Garamond", "Book Antiqua", "Palatino", "Palatino Linotype", "Times New Roman", serif;
+
+    /* 2. Override the internal variables Tailwind uses for the base 'font-sans' */
+    /* This is the secret sauce to making it stick globally without extra classes */
+    --font-sans: var(--font-sharp);
+    --default-font-family: var(--font-sharp);
+}
+/* You can still use standard CSS variables for logic if you prefer */
+:root {
+    --bg-current: var(--color-theme-bg);
+}
+
+.theme-light {
+    --color-theme-bg: #f8fafc;
+    --color-theme-text: #0f172a;
+}
