@@ -2,6 +2,7 @@
 from enum import IntEnum
 import numpy as np 
 
+
 class Action (IntEnum):
     UP = 0
     RIGHT =1 
@@ -10,17 +11,27 @@ class Action (IntEnum):
 
 possible_actions = list(range(len(Action)))
 class Agent():
-    def __init__(self , env_size,  start= (0,0)):
+    def __init__(self , env_size,  start= (0,0), epsilon = .01, gamma=1):
         self.state  = start 
-        self.value_table= np.zeros((env_size, env_size)) 
+        self.q_table= np.zeros((env_size, env_size, len(possible_actions))) 
+        self.returns= np.zeros((env_size, env_size, len(possible_actions)))
+        self.returns_count = np.zeros((env_size, env_size, len(possible_actions)))
         self.policy = np.full((env_size, env_size, len(possible_actions)), 1.0/len(possible_actions)) # each action has a certain prob to be picked in each state. initially random policy (every action equally probable)
-    
-    #based on the probabilities of each action at this state, return the action chosen 
+        self.gamma = gamma
+        self.epsilon = epsilon
+    #based on policy for probabilities of the action at that state, return the action chosen 
+    #TODO: can make episilon soft and greedy versions later 
     def get_action(self): 
         row, col = self.state 
         #the probs should sum to one 
         action = np.random.choice( possible_actions, p=self.policy[row, col] )
         return action 
+    
+    #based on its state and the environment it's in, get action, take action, update state and reward 
+    #when doing the policy iteration, we will build a list of these actions and rewards  
+      
+
+
 
 #environment takes in the state and action of the agent then returns the reward obtained and next state 
 class Environment():
@@ -28,6 +39,8 @@ class Environment():
     def __init__(self , size = 10):
         #size has to be at least 2 
         self.size= max (2, size)  
+        self.rows = self.size
+        self.cols = self.size
         self.terminal = (self.size-1, self.size-1)
         self.obstacles = np.zeros ((self.size, self.size)) # 1 if there is a obstacle there 
     
@@ -53,8 +66,7 @@ class Environment():
             
         return next_state, reward
     
-    #take in the state of the agent and based on their policy run and episode then return their value functions & policy 
-    def episode():
-        pass 
+    
+    
     
     
