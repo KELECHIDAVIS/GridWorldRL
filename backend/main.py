@@ -1,24 +1,21 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from environment import Environment
 from pydantic import BaseModel
 
 app = FastAPI()
+environment = Environment() 
 
-@app.get("/")
-def read_root():   
-    return {"Hello": "World"}
+class StateAction(BaseModel):
+    state: list[int] # row, col 
+    action: int #0 up , 1 right, 2 down, 3 left 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int , q:str | None = None):
-    return {"item_id": item_id, "q": q}
+#takes in agent state and action then returns reward and next state 
+@app.put("/step/")
+async def step(state_action:StateAction):
+    next_state, reward = environment.step(state_action.state, state_action.action) 
+    return {"next_state": next_state, "reward": reward}
 
-#frontend initializes new environment 
-#based on: algo, env size 
-class SimOptions (BaseModel):
-    algorithm: str
-    size: int # the env is gonna be a squre thats at least 2 
-     
-    
-@app.put("/init/")
-def init_sim(options: SimOptions):
-    return {"algo": options.algorithm, "size": options.size }
+#based on agent's current state and policy, runs an episode then returns details through websocket
+@app.put("/episode/")
+async def episode():
+    return {"hello": "world"}
