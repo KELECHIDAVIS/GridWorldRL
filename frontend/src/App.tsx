@@ -4,6 +4,11 @@ import { Algorithm, type SimulationMode, type AlgorithmType } from './types';
 import { LabeledSlider } from './components/LabeledSlider';
 import type { ArrowDirection, GridData, CellData } from './types';
 import { GridPanel } from './components/GridPanel';
+import { Select, type SelectChangeEvent } from '@mui/material';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+
 function makeDummyGrid(size: number): GridData {
   return Array.from({ length: size }, (_, r) =>
     Array.from({ length: size }, (_, c): CellData => {
@@ -102,6 +107,7 @@ function SideBar(){
   const [gridSize, setGridSize] = useState(5); 
   const [numEpisodes, setNumEpisodes] = useState(500); 
   const [checkpointsEvery, setCheckpointsEvery] = useState(Math.trunc(numEpisodes/2)); 
+  const [paintingMode, setPaintingMode] = useState("wall")
 
   useEffect(() => {
     // If the number of episodes becomes smaller than our checkpoint interval,
@@ -111,6 +117,9 @@ function SideBar(){
     }
   }, [numEpisodes, checkpointsEvery]);
   
+  const handlePaintingChange = (event: SelectChangeEvent)=>{
+    setPaintingMode(event.target.value); 
+  }
   return(
     <div className="h-full w-full p-4 border-r border-theme-border bg-theme-panel gap-10">
       <h1 className="opacity-50 pb-8">GRID SETUP</h1>
@@ -125,7 +134,23 @@ function SideBar(){
         onChange={setGridSize}
         color="var(--color-sky-300)" 
       />
-
+      
+      <FormControl sx={{ m: 1, minWidth: 80 }}>
+          <InputLabel id="demo-simple-select-autowidth-label">Age</InputLabel>
+          <Select
+            labelId="demo-simple-select-autowidth-label"
+            id="demo-simple-select-autowidth"
+            value={paintingMode}
+            onChange={handlePaintingChange}
+            autoWidth
+            label="Painting Mode"
+          >
+            <MenuItem value={20}>Painting: Wall</MenuItem>
+            <MenuItem value={21}>Painting: Start</MenuItem>
+            <MenuItem value={22}>Painting: Goal</MenuItem>
+          </Select>
+      </FormControl>
+      
       {/* make paint mode selection */}
 
       <h1 className="opacity-50 pb-5">HYPERPARAMETERS</h1>
@@ -186,7 +211,9 @@ function SideBar(){
 }
 function TableViews(){
 
-  const grid = makeDummyGrid(5); 
+  const grid = makeDummyGrid(5);
+  
+  // TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid 
   function handleCellClick(){
 
   }
