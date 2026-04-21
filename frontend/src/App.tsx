@@ -8,8 +8,8 @@ import { Select, type SelectChangeEvent } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import { Line, LineChart } from "recharts";
-
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import fakeData from './fakeData.json'
 
 function makeDummyGrid(size: number): GridData {
   return Array.from({ length: size }, (_, r) =>
@@ -296,44 +296,86 @@ function TableViews() {
     </div>
   );
 }
-function ResultGraphs(){
-  const data= [{}]
+function ResultGraphs() {
   return (
-    <div className="flex flex-row ">
-      {/* Episode Return Graph */}
-      <section>
-        <LineChart
-          style={{ width: "100%", aspectRatio: 1.618, maxWidth: 600 }}
-          responsive
-          data={data}
-        >
-          <Line dataKey="uv" />
-        </LineChart>
-      </section>
+    /* Change flex-col to h-full and remove extra padding that might shrink the chart area */
+    <div className="h-full w-full flex flex-col px-6 pb-6">
+      <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
+        <h1>Episode Return</h1>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={fakeData}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--color-theme-border)"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="episode"
+              stroke="var(--color-theme-text)"
+              opacity={0.5}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="var(--color-theme-text)"
+              opacity={0.5}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-theme-bg)",
+                borderColor: "var(--color-theme-border)",
+                color: "var(--color-theme-text)",
+              }}
+            />
+            <Legend />
+            <Line
+              name="Raw Return"
+              type="monotone"
+              dataKey="episode_return"
+              stroke="var(--color-sky-400)"
+              strokeWidth={1}
+              opacity={0.5}
+              dot={false}
+            />
+            <Line
+              name="Rolling Average"
+              type="monotone"
+              dataKey="rolling_return"
+              stroke="var(--color-purple-400)"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
-  ); 
+  );
 }
+
 function App() {
   return (
-    <div
-      className={`h-screen w-full flex flex-col font-sans transition-colors duration-300 bg-theme-bg text-theme-text`}
-    >
-      <div className="h-[10%]">
+    <div className="h-screen w-full flex flex-col bg-theme-bg text-theme-text">
+      {/* Header: 10% */}
+      <div className="h-[10%] shrink-0">
         <TopRow />
       </div>
 
       <div className="flex-1 flex flex-row overflow-hidden">
-        <div className="w-[20%]">
+        {/* Sidebar: 20% width */}
+        <div className="w-[20%] shrink-0">
           <SideBar />
         </div>
 
+        {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="h-[70%] border-b border-theme-border p-4">
+          {/* Table Area: Fixed 60% of the parent height */}
+          <div className="h-[60%] shrink-0 border-b border-theme-border p-4 overflow-auto">
             <TableViews />
           </div>
 
-          <div className="flex-1 p-4 bg-theme-panel">
-            <ResultGraphs/> 
+          {/* Graphs Area: Fills the remaining ~30% */}
+          <div className="flex-1 min-h-0 bg-theme-panel">
+            <ResultGraphs />
           </div>
         </div>
       </div>

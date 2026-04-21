@@ -33,6 +33,7 @@ export interface TrainingUpdate {
   policy_changed_pct: number  // for chart 2 -- compute this in Python
   visit_counts: number[][][]    // for chart 3 -- reset each episode
   episode_length: number      // for chart 4
+  rolling_return: number
 }
 
 export type DisplayMode = 'value' | 'policy' | 'replay'; 
