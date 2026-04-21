@@ -2,6 +2,23 @@ import { useState, useEffect } from 'react'
 import RadioCard from './components/RadioCard';
 import { Algorithm, type SimulationMode, type AlgorithmType } from './types';
 import { LabeledSlider } from './components/LabeledSlider';
+import type { ArrowDirection, GridData, CellData } from './types';
+import { GridPanel } from './components/GridPanel';
+function makeDummyGrid(size: number): GridData {
+  return Array.from({ length: size }, (_, r) =>
+    Array.from({ length: size }, (_, c): CellData => {
+      if (r === 0 && c === 0) return { type: 'start' }
+      if (r === size - 1 && c === size - 1) return { type: 'goal' }
+      if (r === 1 && c === 2) return { type: 'wall' }
+      return {
+        type: 'empty',
+        value: Math.random() * 2 - 1,
+        arrow: (['up','down','left','right'] as ArrowDirection[])[Math.floor(Math.random()*4)],
+      }
+    })
+  )
+}
+
 
 // Example of a child component using the new dynamic classes
 function TopRow(){
@@ -167,7 +184,21 @@ function SideBar(){
     </div>
   )
 }
+function TableViews(){
 
+  const grid = makeDummyGrid(5); 
+  function handleCellClick(){
+
+  }
+
+  return(
+    <div className="h-full border-b border-theme-border grid grid-cols-3">
+      <GridPanel title="Snapshot replay"    tag="live"    data={grid} mode="replay" onCellClick={handleCellClick} />
+      <GridPanel title="Policy π(s)"        tag="arrows"  data={grid} mode="policy" onCellClick={handleCellClick} />
+      <GridPanel title="Value table Q(s,a)" tag="heatmap" data={grid} mode="value" onCellClick={handleCellClick} />
+    </div>
+  )
+}
 function App() {
 
   
@@ -186,7 +217,7 @@ function App() {
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="h-[70%] border-b border-theme-border p-4">
-             <h2 className="font-semibold">Policy & Value Tables</h2>
+             <TableViews/>
           </div>
 
           <div className="flex-1 p-4 bg-theme-panel">
