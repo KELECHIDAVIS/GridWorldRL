@@ -37,6 +37,7 @@ export function GridPanel({ title, tag, data, mode, onCellClick }: GridPanelProp
               width: '100%',
               height: '100%',
               gap: '3px',
+            ['--cell-font-size' as string]: `calc(100cqmin / ${size} * 0.30)`, // how much the character takes up in cell 
             }}
           >
             {data.map((row, r) =>
