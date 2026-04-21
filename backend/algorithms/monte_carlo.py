@@ -2,18 +2,20 @@ from environment import Environment, Agent, possible_actions
 import numpy as np 
 #monte carlo control ES; richard sutton 5.3 
 #runs a episode using monte carlo 
-def monte_carlo(env:Environment, agent:Agent, last_agent = None):
+def monte_carlo(env:Environment, agent:Agent, step_limit):
     #generate episode from start following pi 
     states_actions = []
     rewards = []
     policy_changed_pct = 0 
     old_greedy_actions = np.argmax(agent.q_table, axis=2)
-    while agent.state != env.terminal :
+    step = 0 
+    while agent.state != env.terminal and step < step_limit:
         action = agent.get_action() 
         next_state, reward = env.step(agent.state , action)
         states_actions.append((agent.state, action))
         rewards.append(reward)
         agent.state = next_state
+        step+= 1 
     
 
     #loop through backwards:
@@ -48,7 +50,7 @@ def monte_carlo(env:Environment, agent:Agent, last_agent = None):
     new_greedy_actions = np.argmax(agent.q_table, axis=2)
     changes = np.sum(old_greedy_actions != new_greedy_actions)
     policy_changed_pct = (changes / (env.rows * env.cols)) * 100
-    
+
     return G, episode_length, visit_counts, policy_changed_pct #return the episode's return
 
 

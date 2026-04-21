@@ -112,7 +112,7 @@ function SideBar() {
     Math.trunc(numEpisodes / 2),
   );
   const [paintingMode, setPaintingMode] = useState("wall");
-
+  const [stepLimit , setStepLimit] = useState(500); 
   useEffect(() => {
     // If the number of episodes becomes smaller than our checkpoint interval,
     // pull the checkpoint value down so it doesn't exceed the new max.
@@ -209,7 +209,6 @@ function SideBar() {
         </Select>
       </FormControl>
 
-
       <h1 className="opacity-50 pb-5">HYPERPARAMETERS</h1>
 
       {/* Number of Episodes (Pink Accent) */}
@@ -249,17 +248,30 @@ function SideBar() {
         />
       </section>
 
-      <h1 className="opacity-50 pb-5">CHECKPOINTS</h1>
-      {/* Checkpoint Slider (Blue Accent) */}
+      {/* Max Steps */}
       <LabeledSlider
-        title="Every X EPS "
-        value={checkpointsEvery}
-        min={1}
-        max={numEpisodes}
+        title="Max Steps"
+        value={stepLimit}
+        min={0}
+        max={1000}
         step={1}
-        onChange={setCheckpointsEvery}
+        onChange={setStepLimit}
         color="var(--color-sky-300)"
       />
+
+      <h1 className="opacity-50 pb-5">CHECKPOINTS</h1>
+      {/* Checkpoint Slider (Blue Accent) */}
+      <section className="accent-pink">
+        <LabeledSlider
+          title="Every X EPS "
+          value={checkpointsEvery}
+          min={1}
+          max={numEpisodes}
+          step={1}
+          onChange={setCheckpointsEvery}
+          color="var(--color-pink-300)"
+        />
+      </section>
     </div>
   );
 }
