@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import RadioCard from './components/RadioCard';
 import { Algorithm, type SimulationMode, type AlgorithmType } from './types';
+import { LabeledSlider } from './components/LabeledSlider';
 
 // Example of a child component using the new dynamic classes
 function TopRow(){
@@ -79,9 +80,61 @@ function TopRow(){
 }
 
 function SideBar(){
+  const [epsilon, setEpsilon] = useState(.1); 
+  const [gamma, setGamma] = useState(.9); 
+  const [gridSize, setGridSize] = useState(5); 
+  const [numEpisodes, setNumEpisodes] = useState(500); 
   return(
-    <div className="h-full w-full p-4 border-r border-theme-border bg-theme-panel">
-      <h2 className="font-semibold">GRID SETUP</h2>
+    <div className="h-full w-full p-4 border-r border-theme-border bg-theme-panel gap-10">
+      <h2 className="font-semibold opacity-45 pb-8">GRID SETUP</h2>
+      
+      {/* Size Slider (Blue Accent) */}
+      <LabeledSlider 
+        title="Grid Size "
+        value={gridSize}
+        min={2}
+        max={10}
+        step={1}
+        onChange={setGridSize}
+        color="var(--color-sky-300)" 
+      />
+
+      {/* Gamma Slider (Pink Accent) */}
+      <section className="accent-pink">
+        <LabeledSlider 
+          title="Number of Episodes"
+          value={numEpisodes}
+          min={10}
+          max={1000}
+          step={10}
+          onChange={setNumEpisodes}
+          color="var(--color-pink-300)" 
+        />
+      </section>
+      
+      {/* Epsilon Slider (Blue Accent) */}
+      <LabeledSlider 
+        title="Exploration (ε)"
+        value={epsilon}
+        min={0}
+        max={1}
+        step={0.01}
+        onChange={setEpsilon}
+        color="var(--color-sky-300)" 
+      />
+
+      {/* Gamma Slider (Pink Accent) */}
+      <section className="accent-pink">
+        <LabeledSlider 
+          title="Discount Factor (γ)"
+          value={gamma}
+          min={0}
+          max={1}
+          step={0.01}
+          onChange={setGamma}
+          color="var(--color-pink-300)" 
+        />
+      </section>
     </div>
   )
 }

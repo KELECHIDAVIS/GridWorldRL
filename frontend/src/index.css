@@ -8,7 +8,7 @@
     --color-theme-border: var(--color-zinc-800);
 
     /* 1. Define your sharp stack */
-    --font-sharp: "Garamond", "Book Antiqua", "Palatino", "Palatino Linotype", "Times New Roman", serif;
+    --font-sharp: "Palatino Linotype","Cambria","Garamond", "Book Antiqua", "Palatino", "Palatino Linotype", "Times New Roman", serif;
 
     /* 2. Override the internal variables Tailwind uses for the base 'font-sans' */
     /* This is the secret sauce to making it stick globally without extra classes */
