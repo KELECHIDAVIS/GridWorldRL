@@ -27,9 +27,12 @@ export type GridData = CellData[][]  // [row][col]
 // what the websocket sends us, converted into GridData
 export interface TrainingUpdate {
   episode: number
-  q_table: number[][][][]   // [row][col][action] 
+  q_table: number[][][]   // [row][col][action] 
   policy: number[][][]      // [row][col][action]
-  episode_return: number
+  episode_return: number // chart 1 
+  policy_changed_pct: number  // for chart 2 -- compute this in Python
+  visit_counts: number[][][]    // for chart 3 -- reset each episode
+  episode_length: number      // for chart 4
 }
 
 export type DisplayMode = 'value' | 'policy' | 'replay'; 

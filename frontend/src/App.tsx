@@ -8,6 +8,8 @@ import { Select, type SelectChangeEvent } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import { Line, LineChart } from "recharts";
+
 
 function makeDummyGrid(size: number): GridData {
   return Array.from({ length: size }, (_, r) =>
@@ -294,6 +296,23 @@ function TableViews() {
     </div>
   );
 }
+function ResultGraphs(){
+  const data= [{}]
+  return (
+    <div className="flex flex-row ">
+      {/* Episode Return Graph */}
+      <section>
+        <LineChart
+          style={{ width: "100%", aspectRatio: 1.618, maxWidth: 600 }}
+          responsive
+          data={data}
+        >
+          <Line dataKey="uv" />
+        </LineChart>
+      </section>
+    </div>
+  ); 
+}
 function App() {
   return (
     <div
@@ -314,7 +333,7 @@ function App() {
           </div>
 
           <div className="flex-1 p-4 bg-theme-panel">
-            <h2 className="font-semibold">Results</h2>
+            <ResultGraphs/> 
           </div>
         </div>
       </div>

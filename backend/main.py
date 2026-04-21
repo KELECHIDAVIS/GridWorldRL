@@ -13,7 +13,7 @@ class StateAction(BaseModel):
 class Algorithm(IntEnum):
     MONTE_CARLO = 0 
 
-
+#TODO:add a max steps limit so that it's not inf  
 @app.websocket('/ws/train')
 async def train(websocket: WebSocket):
     await websocket.accept()
@@ -32,18 +32,27 @@ async def train(websocket: WebSocket):
 
     for episode in range(config['episodes']):
         agent.state = start  # reset agent to start before each episode
-
+        G = 0 
+        policy_changed_pct = 0 
+        visit_counts = [[]]
+        episode_length = 0 
         if config['algorithm'] == Algorithm.MONTE_CARLO:
-            monte_carlo(env, agent)
+            G, episode_length, visit_counts, policy_changed_pct = monte_carlo(env, agent)
 
         # save snapshot at checkpoints
         if episode % checkpoint_every == 0 or episode == config['episodes']- 1:
             policy_snapshots[episode] = agent.policy.tolist()
+            
+            # calculate all metrix needed for results graphs: epi
             await websocket.send_json({
                 'type': 'update',
                 'episode': episode,
                 'q_table': agent.q_table.tolist(),
                 'policy': agent.policy.tolist(),
+                'episode_return': G,
+                'policy_changed_pct': policy_changed_pct,
+                'visit_counts': visit_counts.tolist(),
+                'episode_length': episode_length 
             })
 
     # training done -- send all snapshots for replay

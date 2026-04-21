@@ -2,10 +2,12 @@ from environment import Environment, Agent, possible_actions
 import numpy as np 
 #monte carlo control ES; richard sutton 5.3 
 #runs a episode using monte carlo 
-def monte_carlo(env:Environment, agent:Agent):
+def monte_carlo(env:Environment, agent:Agent, last_agent = None):
     #generate episode from start following pi 
     states_actions = []
     rewards = []
+    policy_changed_pct = 0 
+    old_greedy_actions = np.argmax(agent.q_table, axis=2)
     while agent.state != env.terminal :
         action = agent.get_action() 
         next_state, reward = env.step(agent.state , action)
@@ -13,16 +15,18 @@ def monte_carlo(env:Environment, agent:Agent):
         rewards.append(reward)
         agent.state = next_state
     
+
     #loop through backwards:
     G = 0
     visited = set()  
+    visit_counts = np.zeros((env.rows, env.cols))
 
     for i in range(len(rewards) - 1, -1, -1):
         G = agent.gamma * G + rewards[i]
 
         pair = states_actions[i]
         if pair not in visited: #first visit 
-            visited.add(pair)
+            visited.add(pair) 
 
             state, action = pair
             row, col = state
@@ -36,6 +40,16 @@ def monte_carlo(env:Environment, agent:Agent):
             best_action = np.argmax(agent.q_table[row, col])
             agent.policy[row, col] = agent.epsilon / len(possible_actions)
             agent.policy[row, col, best_action] += 1 - agent.epsilon
+       
+        visit_counts[pair[0] , pair[1]] += 1
+    
+    episode_length = len (rewards)
+
+    new_greedy_actions = np.argmax(agent.q_table, axis=2)
+    changes = np.sum(old_greedy_actions != new_greedy_actions)
+    policy_changed_pct = (changes / (env.rows * env.cols)) * 100
+    
+    return G, episode_length, visit_counts, policy_changed_pct #return the episode's return
 
 
 
