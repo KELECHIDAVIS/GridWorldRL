@@ -299,7 +299,7 @@ function TableViews() {
 function ResultGraphs() {
   return (
     /* Change flex-col to h-full and remove extra padding that might shrink the chart area */
-    <div className="h-full w-full flex flex-col px-6 pb-6">
+    <div className="h-full w-full flex flex-row px-6 pb-6">
       <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
         <h1>Episode Return</h1>
         <ResponsiveContainer width="100%" height="100%">
@@ -348,6 +348,84 @@ function ResultGraphs() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
+        <h1>% Policy Changed</h1>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={fakeData}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--color-theme-border)"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="episode"
+              stroke="var(--color-theme-text)"
+              opacity={0.5}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="var(--color-theme-text)"
+              opacity={0.5}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-theme-bg)",
+                borderColor: "var(--color-theme-border)",
+                color: "var(--color-theme-text)",
+              }}
+            />
+            <Line
+              name="%"
+              type="monotone"
+              dataKey="policy_changed_pct"
+              stroke="var(--color-green-400)"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      {/* Episode Length */}
+      <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
+        <h1>Episode Length</h1>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={fakeData}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--color-theme-border)"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="episode"
+              stroke="var(--color-theme-text)"
+              opacity={0.5}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="var(--color-theme-text)"
+              opacity={0.5}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-theme-bg)",
+                borderColor: "var(--color-theme-border)",
+                color: "var(--color-theme-text)",
+              }}
+            />
+            <Line
+              name="Episode Length"
+              type="monotone"
+              dataKey="episode_length"
+              stroke="var(--color-orange-400)"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      
     </div>
   );
 }
