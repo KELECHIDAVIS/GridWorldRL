@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RadioCard from './components/RadioCard';
 import { Algorithm, type SimulationMode, type AlgorithmType } from './types';
 import { LabeledSlider } from './components/LabeledSlider';
@@ -84,9 +84,19 @@ function SideBar(){
   const [gamma, setGamma] = useState(.9); 
   const [gridSize, setGridSize] = useState(5); 
   const [numEpisodes, setNumEpisodes] = useState(500); 
+  const [checkpointsEvery, setCheckpointsEvery] = useState(Math.trunc(numEpisodes/2)); 
+
+  useEffect(() => {
+    // If the number of episodes becomes smaller than our checkpoint interval,
+    // pull the checkpoint value down so it doesn't exceed the new max.
+    if (checkpointsEvery > numEpisodes) {
+      setCheckpointsEvery(numEpisodes);
+    }
+  }, [numEpisodes, checkpointsEvery]);
+  
   return(
     <div className="h-full w-full p-4 border-r border-theme-border bg-theme-panel gap-10">
-      <h2 className="font-semibold opacity-45 pb-8">GRID SETUP</h2>
+      <h1 className="opacity-50 pb-8">GRID SETUP</h1>
       
       {/* Size Slider (Blue Accent) */}
       <LabeledSlider 
@@ -99,7 +109,11 @@ function SideBar(){
         color="var(--color-sky-300)" 
       />
 
-      {/* Gamma Slider (Pink Accent) */}
+      {/* make paint mode selection */}
+
+      <h1 className="opacity-50 pb-5">HYPERPARAMETERS</h1>
+
+      {/* Number of Episodes (Pink Accent) */}
       <section className="accent-pink">
         <LabeledSlider 
           title="Number of Episodes"
@@ -135,6 +149,21 @@ function SideBar(){
           color="var(--color-pink-300)" 
         />
       </section>
+
+      <h1 className="opacity-50 pb-5">CHECKPOINTS</h1>
+      {/* Checkpoint Slider (Blue Accent) */}
+      <LabeledSlider 
+        title="Every X EPS "
+        value={checkpointsEvery}
+        min={1}
+        max={numEpisodes}
+        step={1}
+        onChange={setCheckpointsEvery}
+        color="var(--color-sky-300)" 
+      />
+
+
+
     </div>
   )
 }
