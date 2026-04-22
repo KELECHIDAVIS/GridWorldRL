@@ -71,15 +71,18 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
   }
 
   if (mode === 'policy' && data.arrow) {
+    const isGreedy =
+      data.isGreedyPath && data.type == 'empty';
+
     return (
       <div
-        className={`${base} text-base ${data.isGreedyPath ? 'bg-purple-950 border border-purple-700 text-purple-300' : 'bg-zinc-900 border border-zinc-800 text-zinc-400'}`}
-        onClick={()=> onClick(data.row, data.col)}
-        style={{ fontSize: 'var(--cell-font-size)' }}
+        className={`${base} text-base ${data.isGreedyPath ? "bg-purple-950 border border-purple-700 text-purple-300" : "bg-zinc-900 border border-zinc-800 text-zinc-400"}  ${isGreedy ? "ring-2 ring-purple-400 bg-purple-400/20" : ""}`}
+        onClick={() => onClick(data.row, data.col)}
+        style={{ fontSize: "var(--cell-font-size)" }}
       >
         {ARROWS[data.arrow]}
       </div>
-    )
+    );
   }
 
   // fallback empty cell (replay panel background)

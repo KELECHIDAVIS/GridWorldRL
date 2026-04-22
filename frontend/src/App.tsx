@@ -536,7 +536,7 @@ function App() {
   const initialGrid: GridData = makeSimpleGrid(gridSize);
   const [grid, setGrid] = useState<GridData>(initialGrid);
   // fill the tables relevant data in Griddata form based on current update 
-  const displayGrid = currentUpdate ? applyTrainingUpdate(grid, currentUpdate) : grid
+  const displayGrid = currentUpdate ? applyTrainingUpdate(grid, currentUpdate,startPos, goalPos) : grid
   const isTraining = simMode === 'training' 
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
