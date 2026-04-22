@@ -491,7 +491,7 @@ function App() {
   const [gridSize, setGridSize] = useState(5);
   const [numEpisodes, setNumEpisodes] = useState(500);
   const [checkpointsEvery, setCheckpointsEvery] = useState(
-    Math.trunc(numEpisodes / 2),
+    Math.max(1, Math.trunc(numEpisodes / 10)),
   );
   const [paintingMode, setPaintingMode] = useState("wall");
   const [stepLimit, setStepLimit] = useState(500);
