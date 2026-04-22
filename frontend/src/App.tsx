@@ -391,6 +391,9 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
               tickLine={false}
             />
             <Tooltip
+              formatter={(value) =>
+                typeof value === "number" ? value.toFixed(2) : value
+              }
               contentStyle={{
                 backgroundColor: "var(--color-theme-bg)",
                 borderColor: "var(--color-theme-border)",
@@ -439,6 +442,9 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
               tickLine={false}
             />
             <Tooltip
+              formatter={(value) =>
+                typeof value === "number" ? value.toFixed(2) : value
+              }
               contentStyle={{
                 backgroundColor: "var(--color-theme-bg)",
                 borderColor: "var(--color-theme-border)",
@@ -478,6 +484,9 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
               tickLine={false}
             />
             <Tooltip
+              formatter={(value) =>
+                typeof value === "number" ? value.toFixed(2) : value
+              }
               contentStyle={{
                 backgroundColor: "var(--color-theme-bg)",
                 borderColor: "var(--color-theme-border)",
@@ -498,9 +507,6 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
     </div>
   );
 }
-
-// TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
-function handleCellClick() {}
 
 function App() {
   // currentUpdate → feeds GridPanel (grids re-render each drain tick)
@@ -589,6 +595,10 @@ function App() {
     console.log(config);
     // connect to websocket
     connect(config);
+  }
+  // TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
+  function handleCellClick(row: number, col: number) {
+    console.log({ row, col });
   }
 
   return (

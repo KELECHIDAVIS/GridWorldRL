@@ -6,7 +6,7 @@ interface GridPanelProps {
   tag: string
   data: GridData
   mode: DisplayMode
-  onCellClick?: (row: number, col: number) => void
+  onCellClick: (row: number, col: number) => void
 }
 
 export function GridPanel({ title, tag, data, mode, onCellClick }: GridPanelProps) {
@@ -46,7 +46,7 @@ export function GridPanel({ title, tag, data, mode, onCellClick }: GridPanelProp
                   key={`${r}-${c}`}
                   data={cell}
                   mode={mode}
-                  onClick={() => onCellClick?.(r, c)}
+                  onClick={() => onCellClick(r, c)}
                 />
               ))
             )}

@@ -19,7 +19,7 @@ function valueToColor(value: number): string {
 interface GridCellProps {
   data: CellData
   mode: DisplayMode
-  onClick?: () => void; 
+  onClick: (row:number , col:number) => void; 
 }
 
 export function GridCell({ data, mode, onClick  }: GridCellProps) {
@@ -28,12 +28,12 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
   
 
   if (data.type === 'wall') {
-    return <div className={`${base} bg-zinc-800`} onClick={onClick} style={{ fontSize: 'var(--cell-font-size)' }}/>
+    return <div className={`${base} bg-zinc-800`} onClick={()=> onClick(data.row, data.col)} style={{ fontSize: 'var(--cell-font-size)' }}/>
   }
 
   if (data.type === 'start') {
     return (
-      <div className={`${base} bg-zinc-900 border border-teal-700 text-teal-400 font-bold text-[10px]`} onClick={onClick} style={{ fontSize: 'var(--cell-font-size)' }}>
+      <div className={`${base} bg-zinc-900 border border-teal-700 text-teal-400 font-bold text-[10px]`} onClick={()=> onClick(data.row, data.col)} style={{ fontSize: 'var(--cell-font-size)' }}>
         S
       </div>
     )
@@ -41,7 +41,7 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
 
   if (data.type === 'goal') {
     return (
-      <div className={`${base} bg-zinc-900 border border-green-700 text-green-400 font-bold text-[10px]`} onClick={onClick} style={{ fontSize: 'var(--cell-font-size)' }}>
+      <div className={`${base} bg-zinc-900 border border-green-700 text-green-400 font-bold text-[10px]`} onClick={()=> onClick(data.row, data.col)} style={{ fontSize: 'var(--cell-font-size)' }}>
         G
       </div>
     )
@@ -52,7 +52,7 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
       <div
         className={`${base} rounded-full border-2`}
         style={{ borderColor: data.agentColor, background: `${data.agentColor}22`, fontSize: 'var(--cell-font-size)'  }}
-        onClick={onClick}
+        onClick={()=> onClick(data.row, data.col)}
       />
     )
   }
@@ -63,7 +63,7 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
       <div
         className={`${base} text-[9px]`}
         style={{ background: valueToColor(data.value), color: '#c2c0b6', fontSize: 'var(--cell-font-size)' }}
-        onClick={onClick}
+        onClick={()=> onClick(data.row, data.col)}
       >
         {data.value.toFixed(2)}
       </div>
@@ -74,7 +74,7 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
     return (
       <div
         className={`${base} text-base ${data.isGreedyPath ? 'bg-purple-950 border border-purple-700 text-purple-300' : 'bg-zinc-900 border border-zinc-800 text-zinc-400'}`}
-        onClick={onClick}
+        onClick={()=> onClick(data.row, data.col)}
         style={{ fontSize: 'var(--cell-font-size)' }}
       >
         {ARROWS[data.arrow]}
@@ -84,6 +84,6 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
 
   // fallback empty cell (replay panel background)
   return (
-    <div className={`${base} bg-zinc-900 border border-zinc-800/50`} onClick={onClick} style={{ fontSize: 'var(--cell-font-size)' }} />
+    <div className={`${base} bg-zinc-900 border border-zinc-800/50`} onClick={()=> onClick(data.row, data.col)} style={{ fontSize: 'var(--cell-font-size)' }} />
   )
 }
