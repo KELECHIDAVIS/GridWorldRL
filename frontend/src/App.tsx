@@ -25,26 +25,6 @@ import {
 } from "recharts";
 import { useTrainingSocket } from "./hooks/useTrainingSocket";
 
-function makeDummyGrid(size: number): GridData {
-  return Array.from({ length: size }, (_, r) =>
-    Array.from({ length: size }, (_, c): CellData => {
-      if (r === 0 && c === 0) return { type: "start", row: r, col: c };
-      if (r === size - 1 && c === size - 1)
-        return { type: "goal", row: r, col: c };
-      // if (r === 1 && c === 0) return { type: "wall", row: r, col: c };
-      return {
-        type: "empty",
-        value: Math.random() * 2 - 1,
-        arrow: (["up", "down", "left", "right"] as ArrowDirection[])[
-          Math.floor(Math.random() * 4)
-        ],
-        row: r,
-        col: c,
-      };
-    }),
-  );
-}
-
 interface TopRowProps {
   selectedAlgo: AlgorithmType;
   setAlgo: (algo: AlgorithmType) => void;
@@ -133,7 +113,7 @@ interface SideBarProps {
   checkpointsEvery: number;
   setCheckpointsEvery: (checkPt: number) => void;
   paintingMode: string;
-  setPaintingMode: (paintMode: string) => void;
+  setPaintingMode: (paintMode: CellType) => void;
   stepLimit: number;
   setStepLimit: (stepL: number) => void;
   displaySpeed: number;
@@ -166,7 +146,7 @@ function SideBar({
   }, [numEpisodes, checkpointsEvery]);
 
   const handlePaintingChange = (event: SelectChangeEvent) => {
-    setPaintingMode(event.target.value);
+    setPaintingMode(event.target.value as CellType);
   };
   return (
     <div className="h-full w-full p-4 border-r border-theme-border bg-theme-panel gap-10">
@@ -260,6 +240,7 @@ function SideBar({
             },
           }}
         >
+          <MenuItem value={"empty"}>Painting: Empty</MenuItem>
           <MenuItem value={"wall"}>Painting: Wall</MenuItem>
           <MenuItem value={"start"}>Painting: Start</MenuItem>
           <MenuItem value={"goal"}>Painting: Goal</MenuItem>
@@ -531,7 +512,12 @@ function App() {
   const [paintingMode, setPaintingMode] = useState<CellType>("wall");
   const [stepLimit, setStepLimit] = useState(500);
 
-  const initialGrid: GridData = makeDummyGrid(gridSize);
+  const [startPos, setStartPos] = useState<[number, number]>([0, 0]);
+  const [goalPos, setGoalPos] = useState<[number, number]>([
+    gridSize - 1,
+    gridSize - 1,
+  ]);
+  const initialGrid: GridData = makeSimpleGrid(gridSize);
   const [grid, setGrid] = useState<GridData>(initialGrid);
 
   useEffect(() => {
@@ -548,42 +534,50 @@ function App() {
 
   // whenever the grid size changes, update the grid with a new dummy one
   useEffect(() => {
-    const newGrid = makeDummyGrid(gridSize);
+    const newGrid = makeSimpleGrid(gridSize);
     setGrid(newGrid);
+    setStartPos([0, 0]);
+    setGoalPos([gridSize - 1, gridSize - 1]);
   }, [gridSize]);
 
-  function extractGridInfo() {
+  function extractObstacleInfo() {
     let obstacleList: number[][] = Array.from({ length: gridSize }, () =>
       Array(gridSize).fill(0),
     );
+    return obstacleList;
+  }
 
-    let startPos: number[] = [0, 0];
-    let terminalPos: number[] = [gridSize - 1, gridSize - 1];
-
-    for (let row = 0; row < gridSize; row++) {
-      for (let col = 0; col < gridSize; col++) {
-        if (grid[row][col].type == "wall") obstacleList[row][col] = 1;
-        else if (grid[row][col].type == "start") {
-          startPos[0] = row;
-          startPos[1] = col;
-        } else if (grid[row][col].type == "goal") {
-          terminalPos[0] = row;
-          terminalPos[1] = col;
+  function makeSimpleGrid(size: number): GridData {
+    return Array.from({ length: size }, (_, r) =>
+      Array.from({ length: size }, (_, c): CellData => {
+        if (r === 0 && c === 0) {
+          return { type: "start", row: r, col: c };
         }
-      }
-    }
-
-    return { startPos, terminalPos, obstacleList };
+        if (r === size - 1 && c === size - 1) {
+          return { type: "goal", row: r, col: c };
+        }
+        // if (r === 1 && c === 0) return { type: "wall", row: r, col: c };
+        return {
+          type: "empty",
+          value: Math.random() * 2 - 1,
+          arrow: (["up", "down", "left", "right"] as ArrowDirection[])[
+            Math.floor(Math.random() * 4)
+          ],
+          row: r,
+          col: c,
+        };
+      }),
+    );
   }
 
   function startTraining() {
     // get config as an object
     //based on gridData, get a 2d list of objects, the start pos , and end pos
-    const { startPos, terminalPos, obstacleList } = extractGridInfo();
+    const obstacleList = extractObstacleInfo();
     let config = {
       env_size: gridSize,
       obstacles: obstacleList,
-      terminal: terminalPos,
+      terminal: goalPos,
       start: startPos,
       epsilon,
       gamma,
@@ -597,20 +591,53 @@ function App() {
     connect(config);
   }
   // TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
-  function updateGridElement (rowIndex: number, colIndex: number, cellData : CellData){
-    setGrid((prevGrid) =>
-      prevGrid.map((row, rIdx) =>
+  function updateGridElement(
+    rowIndex: number,
+    colIndex: number,
+    cellData: CellData,
+  ) {
+    setGrid((prevGrid) => {
+      if (prevGrid[rowIndex][colIndex].type === cellData.type) return prevGrid;
+      return prevGrid.map((row, rIdx) =>
         rIdx === rowIndex
           ? row.map((col, cIdx) => (cIdx === colIndex ? cellData : col))
           : row,
-      ),
-    );
+      );
+    });
   }
+  function sameCoords(a: number[], b: number[]) {
+    return a.length === b.length && a.every((val, index) => val === b[index]);
+  }
+  // have to make sure that start and goal isn't overriden by painting
+  //TODO: a little ineffecient having to iterate through the list every time painting to search but too lazy to refactor file :/
   function handleCellClick(row: number, col: number) {
-    if (paintingMode == 'wall'){
-       updateGridElement(row, col, {type:'wall', row, col});
+    const isProtected =
+      sameCoords([row, col], startPos) || sameCoords([row, col], goalPos);
+
+    // cannot overwrite a start or goal block
+    if (isProtected) return;
+
+    if (paintingMode == "wall" || paintingMode == "empty") {
+      updateGridElement(row, col, { type: paintingMode, row, col });
+    } else if (paintingMode == "start") {
+      //remove start from last pos
+      updateGridElement(startPos[0], startPos[1], {
+        type: "empty",
+        row: startPos[0],
+        col: startPos[1],
+      });
+      updateGridElement(row, col, { type: "start", row, col });
+      setStartPos([row, col]);
+    } else if (paintingMode == "goal") {
+      //remove goal from last pos
+      updateGridElement(goalPos[0], goalPos[1], {
+        type: "empty",
+        row: goalPos[0],
+        col: goalPos[1],
+      });
+      updateGridElement(row, col, { type: "goal", row, col });
+      setGoalPos([row, col]);
     }
-    
   }
 
   return (
