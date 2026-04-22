@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import RadioCard from "./components/RadioCard";
-import { Algorithm, type SimulationMode, type AlgorithmType, type TrainingUpdate } from "./types";
+import {
+  Algorithm,
+  type SimulationMode,
+  type AlgorithmType,
+  type TrainingUpdate,
+} from "./types";
 import { LabeledSlider } from "./components/LabeledSlider";
 import type { ArrowDirection, GridData, CellData } from "./types";
 import { GridPanel } from "./components/GridPanel";
@@ -8,21 +13,33 @@ import { Select, type SelectChangeEvent } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { useTrainingSocket } from "./hooks/useTrainingSocket";
 
 function makeDummyGrid(size: number): GridData {
   return Array.from({ length: size }, (_, r) =>
     Array.from({ length: size }, (_, c): CellData => {
-      if (r === 0 && c === 0) return { type: "start" };
-      if (r === size - 1 && c === size - 1) return { type: "goal" };
-      if (r === 1 && c === 2) return { type: "wall" };
+      if (r === 0 && c === 0) return { type: "start", row: r, col: c };
+      if (r === size - 1 && c === size - 1)
+        return { type: "goal", row: r, col: c };
+      // if (r === 1 && c === 0) return { type: "wall", row: r, col: c };
       return {
         type: "empty",
         value: Math.random() * 2 - 1,
         arrow: (["up", "down", "left", "right"] as ArrowDirection[])[
           Math.floor(Math.random() * 4)
         ],
+        row: r,
+        col: c,
       };
     }),
   );
@@ -35,8 +52,7 @@ interface TopRowProps {
   setSimMode: (mode: SimulationMode) => void;
 }
 // Example of a child component using the new dynamic classes
-function TopRow({selectedAlgo, setAlgo, simMode, setSimMode}: TopRowProps) {
-  
+function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
   return (
     <div className="h-full w-full p-4 border-b border-theme-border flex flex-row justify-between items-center bg-theme-panel">
       {/* title */}
@@ -120,11 +136,27 @@ interface SideBarProps {
   setPaintingMode: (paintMode: string) => void;
   stepLimit: number;
   setStepLimit: (stepL: number) => void;
-  displaySpeed :number
-  setDisplaySpeed:(speed:number)=>void 
+  displaySpeed: number;
+  setDisplaySpeed: (speed: number) => void;
 }
- function SideBar({epsilon, setEpsilon, gamma, setGamma, gridSize, setGridSize, numEpisodes, setNumEpisodes, checkpointsEvery, setCheckpointsEvery, paintingMode, setPaintingMode, stepLimit, setStepLimit, displaySpeed, setDisplaySpeed}: SideBarProps) {
-   
+function SideBar({
+  epsilon,
+  setEpsilon,
+  gamma,
+  setGamma,
+  gridSize,
+  setGridSize,
+  numEpisodes,
+  setNumEpisodes,
+  checkpointsEvery,
+  setCheckpointsEvery,
+  paintingMode,
+  setPaintingMode,
+  stepLimit,
+  setStepLimit,
+  displaySpeed,
+  setDisplaySpeed,
+}: SideBarProps) {
   useEffect(() => {
     // If the number of episodes becomes smaller than our checkpoint interval,
     // pull the checkpoint value down so it doesn't exceed the new max.
@@ -144,7 +176,7 @@ interface SideBarProps {
       <section className="accent-pink">
         <LabeledSlider
           title="Animation Display Speed (ms)"
-          value={displaySpeed }
+          value={displaySpeed}
           min={10}
           max={1000}
           step={10}
@@ -158,7 +190,7 @@ interface SideBarProps {
         title="Grid Size "
         value={gridSize}
         min={2}
-        max={10}
+        max={15}
         step={1}
         onChange={setGridSize}
         color="var(--color-sky-300)"
@@ -234,7 +266,6 @@ interface SideBarProps {
         </Select>
       </FormControl>
 
-
       {/* Number of Episodes (Pink Accent) */}
       <section className="accent-pink">
         <LabeledSlider
@@ -299,12 +330,11 @@ interface SideBarProps {
   );
 }
 
-interface TableViewsProp{
-  grid:GridData; 
-  handleCellClick:(row:number, col:number)=> void ; 
+interface TableViewsProp {
+  grid: GridData;
+  handleCellClick: (row: number, col: number) => void;
 }
-function TableViews({grid, handleCellClick}:TableViewsProp) {
-
+function TableViews({ grid, handleCellClick }: TableViewsProp) {
   return (
     <div className="h-full border-b border-theme-border grid grid-cols-3">
       <GridPanel
@@ -333,10 +363,10 @@ function TableViews({grid, handleCellClick}:TableViewsProp) {
   );
 }
 
-interface ResultGraphsProps{
-  episodeHistory:TrainingUpdate[]; 
+interface ResultGraphsProps {
+  episodeHistory: TrainingUpdate[];
 }
-function ResultGraphs({episodeHistory}:ResultGraphsProps) {
+function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
   return (
     /* Change flex-col to h-full and remove extra padding that might shrink the chart area */
     <div className="h-full w-full flex flex-row px-6 pb-6">
@@ -465,7 +495,6 @@ function ResultGraphs({episodeHistory}:ResultGraphsProps) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
     </div>
   );
 }
@@ -478,7 +507,7 @@ function App() {
   // episodeHistory → feeds your charts (array grows over time)
   // snapshots → feeds replay panel (available after training completes)
   // status → controls which UI is visible
-  const [displaySpeed, setDisplaySpeed] = useState(600); // in milliseconds 
+  const [displaySpeed, setDisplaySpeed] = useState(600); // in milliseconds
   const { status, currentUpdate, episodeHistory, snapshots, connect } =
     useTrainingSocket(displaySpeed);
   const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
@@ -496,64 +525,71 @@ function App() {
   const [paintingMode, setPaintingMode] = useState("wall");
   const [stepLimit, setStepLimit] = useState(500);
 
-  const grid = makeDummyGrid(5);
-  
+  const initialGrid: GridData = makeDummyGrid(gridSize);
+  const [grid, setGrid] = useState<GridData>(initialGrid);
+
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
     // else clear env for next training round
     if (simMode == "training") {
       // send hyper params to backend and start populating the graphs based on web socket data
       console.log("Start Training");
-      startTraining(); 
+      startTraining();
     } else {
       console.log("Editing World");
     }
-  }, [simMode]); 
+  }, [simMode]);
 
-  function extractGridInfo(){
-      let obstacleList: number[][] = Array.from ({length:gridSize}, () => Array(gridSize).fill(0))
+  // whenever the grid size changes, update the grid with a new dummy one
+  useEffect(() => {
+    const newGrid = makeDummyGrid(gridSize);
+    setGrid(newGrid);
+  }, [gridSize]);
 
-      let startPos : number[] = [0,0] 
-      let terminalPos: number[] = [gridSize-1, gridSize-1];
-      
-      for (let row= 0 ; row<gridSize ; row++){
-        for (let col = 0 ; col <gridSize ; col++ ){
-          if (grid[row][col].type == "wall") obstacleList[row][col] = 1;
-          else if (grid[row][col].type == "start") {
-            startPos[0] = row;
-            startPos[1] = col;
-          } else if (grid[row][col].type == "goal") {
-            terminalPos[0] = row;
-            terminalPos[1] = col;
-          }
+  function extractGridInfo() {
+    let obstacleList: number[][] = Array.from({ length: gridSize }, () =>
+      Array(gridSize).fill(0),
+    );
+
+    let startPos: number[] = [0, 0];
+    let terminalPos: number[] = [gridSize - 1, gridSize - 1];
+
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        if (grid[row][col].type == "wall") obstacleList[row][col] = 1;
+        else if (grid[row][col].type == "start") {
+          startPos[0] = row;
+          startPos[1] = col;
+        } else if (grid[row][col].type == "goal") {
+          terminalPos[0] = row;
+          terminalPos[1] = col;
         }
       }
+    }
 
-      return {startPos, terminalPos, obstacleList}
+    return { startPos, terminalPos, obstacleList };
   }
 
-  function startTraining(){
-    // get config as an object 
-    //based on gridData, get a 2d list of objects, the start pos , and end pos 
-    const {startPos , terminalPos, obstacleList} = extractGridInfo(); 
+  function startTraining() {
+    // get config as an object
+    //based on gridData, get a 2d list of objects, the start pos , and end pos
+    const { startPos, terminalPos, obstacleList } = extractGridInfo();
     let config = {
-      env_size : gridSize,
+      env_size: gridSize,
       obstacles: obstacleList,
-      terminal:terminalPos,
-      start:startPos,
+      terminal: terminalPos,
+      start: startPos,
       epsilon,
       gamma,
       checkpoint_every: checkpointsEvery,
-      episodes:numEpisodes,
-      algorithm:selectedAlgo,
-      step_limit:stepLimit,
-    }
-    console.log(config); 
-    // connect to websocket 
-    connect(config)
+      episodes: numEpisodes,
+      algorithm: selectedAlgo,
+      step_limit: stepLimit,
+    };
+    console.log(config);
+    // connect to websocket
+    connect(config);
   }
-
-  
 
   return (
     <div className="h-screen w-full flex flex-col bg-theme-bg text-theme-text">

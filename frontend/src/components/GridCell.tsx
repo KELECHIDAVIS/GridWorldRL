@@ -19,10 +19,10 @@ function valueToColor(value: number): string {
 interface GridCellProps {
   data: CellData
   mode: DisplayMode
-  onClick?: () => void
+  onClick?: () => void; 
 }
 
-export function GridCell({ data, mode, onClick }: GridCellProps) {
+export function GridCell({ data, mode, onClick  }: GridCellProps) {
   const base = "w-full h-full flex items-center justify-center text-xs font-mono rounded-sm cursor-pointer select-none transition-all duration-150"
 
   

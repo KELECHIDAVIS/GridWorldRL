@@ -20,6 +20,8 @@ export interface CellData {
   arrow?: ArrowDirection  // for policy display
   agentColor?: string   // for replay panel agents
   isGreedyPath?: boolean // highlights the optimal path
+  row:number ; 
+  col:number
 }
 
 export type GridData = CellData[][]  // [row][col]
