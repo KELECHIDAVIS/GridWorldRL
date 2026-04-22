@@ -53,10 +53,10 @@ class Environment():
             col+=1
         elif action == Action.LEFT and col > 0 and not self.obstacles[row, col-1]:
             col-=1 
-        elif action == Action.UP and row < self.rows-1 and not self.obstacles[row+1, col]:
-            row+=1
-        elif action == Action.DOWN and row > 0 and not self.obstacles[row -1 , col]:
-            row-=1 
+        elif action == Action.UP and row > 0 and not self.obstacles[row-1, col]:
+            row -= 1
+        elif action == Action.DOWN and row < self.rows-1 and not self.obstacles[row+1, col]:
+            row += 1
             
         next_state = (row, col )
         if next_state == self.terminal:

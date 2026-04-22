@@ -24,6 +24,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useTrainingSocket } from "./hooks/useTrainingSocket";
+import { applyTrainingUpdate } from "./utils/applyTrainingUpdate";
 
 interface TopRowProps {
   selectedAlgo: AlgorithmType;
@@ -253,7 +254,7 @@ function SideBar({
           title="Number of Episodes"
           value={numEpisodes}
           min={10}
-          max={1000}
+          max={3000}
           step={10}
           onChange={setNumEpisodes}
           color="var(--color-pink-300)"
@@ -503,14 +504,14 @@ function App() {
   const [simMode, setSimMode] = useState<SimulationMode>("editing");
 
   const [epsilon, setEpsilon] = useState(0.1);
-  const [gamma, setGamma] = useState(0.9);
+  const [gamma, setGamma] = useState(0.99);
   const [gridSize, setGridSize] = useState(5);
-  const [numEpisodes, setNumEpisodes] = useState(500);
+  const [numEpisodes, setNumEpisodes] = useState(2000);
   const [checkpointsEvery, setCheckpointsEvery] = useState(
-    Math.max(1, Math.trunc(numEpisodes / 10)),
+    Math.max(1, Math.trunc(numEpisodes / 40)), //TODO:change back to 10
   );
   const [paintingMode, setPaintingMode] = useState<CellType>("wall");
-  const [stepLimit, setStepLimit] = useState(500);
+  const [stepLimit, setStepLimit] = useState(200);
 
   const [startPos, setStartPos] = useState<[number, number]>([0, 0]);
   const [goalPos, setGoalPos] = useState<[number, number]>([
@@ -519,6 +520,8 @@ function App() {
   ]);
   const initialGrid: GridData = makeSimpleGrid(gridSize);
   const [grid, setGrid] = useState<GridData>(initialGrid);
+  // fill the tables relevant data in Griddata form based on current update 
+  const displayGrid = currentUpdate ? applyTrainingUpdate(grid, currentUpdate) : grid
 
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
@@ -544,6 +547,12 @@ function App() {
     let obstacleList: number[][] = Array.from({ length: gridSize }, () =>
       Array(gridSize).fill(0),
     );
+    for(let row = 0 ; row<gridSize; row++){
+     for (let col = 0; col < gridSize; col++) {
+      if(grid[row][col].type =='wall')
+        obstacleList[row][col] =1 
+     } 
+    }
     return obstacleList;
   }
 
@@ -679,7 +688,7 @@ function App() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Table Area: Fixed 60% of the parent height */}
           <div className="h-[60%] shrink-0 border-b border-theme-border p-4 overflow-auto">
-            <TableViews grid={grid} handleCellClick={handleCellClick} />
+            <TableViews grid={displayGrid} handleCellClick={handleCellClick} />
           </div>
 
           {/* Graphs Area: Fills the remaining ~30% */}

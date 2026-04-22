@@ -12,7 +12,7 @@ export type SimulationMode = 'training' | 'editing';
 
 export type CellType = 'empty' | 'wall' | 'start' | 'goal' | 'agent'
 
-export type ArrowDirection = 'up' | 'down' | 'left' | 'right' | null
+export type ArrowDirection = 'up' | 'right' | 'down' | 'left' | null
 
 export interface CellData {
   type: CellType
