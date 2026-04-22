@@ -45,6 +45,9 @@ async def train(websocket: WebSocket):
         if config['algorithm'] == Algorithm.MONTE_CARLO:
             G, episode_length, visit_counts, policy_changed_pct = monte_carlo(env, agent, config['step_limit'])
 
+        
+            
+
         recent_returns.append(G)
 
         rolling_avg = sum(recent_returns) / len(recent_returns)

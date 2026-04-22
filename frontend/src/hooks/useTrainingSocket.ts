@@ -1,0 +1,78 @@
+// hooks/useTrainingSocket.ts
+import { useState, useRef, useCallback } from "react";
+import type { TrainingUpdate } from "../types";
+
+export function useTrainingSocket(displaySpeed: number) {
+  // what the UI reads to render grids and charts
+  const [currentUpdate, setCurrentUpdate] = useState<TrainingUpdate | null>(
+    null,
+  ); // for heat maps
+  const [episodeHistory, setEpisodeHistory] = useState<TrainingUpdate[]>([]); // for graphs
+  const [snapshots, setSnapshots] = useState<Record<string, number[][][]>>({}); // for replay
+  const [status, setStatus] = useState<"idle" | "training" | "complete">(
+    "idle",
+  );
+
+  // refs hold things that shouldnt cause re-renders when they change
+  const queueRef = useRef<TrainingUpdate[]>([]); // buffer of incoming messages
+  const drainRef = useRef<number | null>(null); // the interval timer id
+  const serverDoneRef = useRef(false); // track when the server stops sending messages
+
+  // this function is recreated everytime display speed changes (useCallback)
+  const drainQueue = useCallback(() => {
+    // every displaySpeed in ms, perform the inner func
+    drainRef.current = setInterval(() => {
+      if (queueRef.current.length === 0) {
+        // only stop and mark complete if server is also done sending 
+        if (serverDoneRef.current){
+            clearInterval(drainRef.current!)
+            setStatus('complete')
+        }
+        return; // dont read from empty
+      }
+
+      const next = queueRef.current.shift()!; // get next episode checkpoint 
+
+      // update the current data so it reflects on the maps and graphs
+      setCurrentUpdate(next);
+      setEpisodeHistory((prev) => [...prev, next]);
+    }, displaySpeed);
+  }, [displaySpeed]);
+
+  const connect = useCallback(
+    (config: object) => {
+      // wipe previous run
+      queueRef.current = [];
+      serverDoneRef.current = false ; 
+      setEpisodeHistory([]);
+      setCurrentUpdate(null);
+      setSnapshots({});
+      setStatus("training");
+
+      const ws = new WebSocket("ws://localhost:8000/ws/train");
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify(config));
+        drainQueue(); // start the interval that drains the queue
+      };
+
+      // whenever message is received, add to queue that's already draining on an interval
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "update") {
+          queueRef.current.push(data); // dump into buffer, interval will show it
+        }
+        if (data.type === "complete") {
+          setSnapshots(data.snapshots);
+          // the queue might still have episodes in it, so setting the status to complete happens in the drainQueue function
+          serverDoneRef.current = true;
+        }
+      };
+
+      ws.onclose = () => {};
+    },
+    [drainQueue],
+  );
+
+  return { status, currentUpdate, episodeHistory, snapshots, connect };
+}

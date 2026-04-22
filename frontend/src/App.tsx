@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import RadioCard from "./components/RadioCard";
-import { Algorithm, type SimulationMode, type AlgorithmType } from "./types";
+import { Algorithm, type SimulationMode, type AlgorithmType, type TrainingUpdate } from "./types";
 import { LabeledSlider } from "./components/LabeledSlider";
 import type { ArrowDirection, GridData, CellData } from "./types";
 import { GridPanel } from "./components/GridPanel";
@@ -9,7 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import fakeData from './fakeData.json'
+import { useTrainingSocket } from "./hooks/useTrainingSocket";
 
 function makeDummyGrid(size: number): GridData {
   return Array.from({ length: size }, (_, r) =>
@@ -28,13 +28,15 @@ function makeDummyGrid(size: number): GridData {
   );
 }
 
+interface TopRowProps {
+  selectedAlgo: AlgorithmType;
+  setAlgo: (algo: AlgorithmType) => void;
+  simMode: SimulationMode;
+  setSimMode: (mode: SimulationMode) => void;
+}
 // Example of a child component using the new dynamic classes
-function TopRow() {
-  const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
-    Algorithm.MONTE_CARLO,
-  );
-
-  const [simMode, setSimMode] = useState<SimulationMode>("editing");
+function TopRow({selectedAlgo, setAlgo, simMode, setSimMode}: TopRowProps) {
+  
   return (
     <div className="h-full w-full p-4 border-b border-theme-border flex flex-row justify-between items-center bg-theme-panel">
       {/* title */}
@@ -103,16 +105,26 @@ function TopRow() {
   );
 }
 
-function SideBar() {
-  const [epsilon, setEpsilon] = useState(0.1);
-  const [gamma, setGamma] = useState(0.9);
-  const [gridSize, setGridSize] = useState(5);
-  const [numEpisodes, setNumEpisodes] = useState(500);
-  const [checkpointsEvery, setCheckpointsEvery] = useState(
-    Math.trunc(numEpisodes / 2),
-  );
-  const [paintingMode, setPaintingMode] = useState("wall");
-  const [stepLimit , setStepLimit] = useState(500); 
+interface SideBarProps {
+  epsilon: number;
+  setEpsilon: (ep: number) => void;
+  gamma: number;
+  setGamma: (gam: number) => void;
+  gridSize: number;
+  setGridSize: (gSize: number) => void;
+  numEpisodes: number;
+  setNumEpisodes: (numEp: number) => void;
+  checkpointsEvery: number;
+  setCheckpointsEvery: (checkPt: number) => void;
+  paintingMode: string;
+  setPaintingMode: (paintMode: string) => void;
+  stepLimit: number;
+  setStepLimit: (stepL: number) => void;
+  displaySpeed :number
+  setDisplaySpeed:(speed:number)=>void 
+}
+ function SideBar({epsilon, setEpsilon, gamma, setGamma, gridSize, setGridSize, numEpisodes, setNumEpisodes, checkpointsEvery, setCheckpointsEvery, paintingMode, setPaintingMode, stepLimit, setStepLimit, displaySpeed, setDisplaySpeed}: SideBarProps) {
+   
   useEffect(() => {
     // If the number of episodes becomes smaller than our checkpoint interval,
     // pull the checkpoint value down so it doesn't exceed the new max.
@@ -126,7 +138,20 @@ function SideBar() {
   };
   return (
     <div className="h-full w-full p-4 border-r border-theme-border bg-theme-panel gap-10">
-      <h1 className="opacity-50 pb-8">GRID SETUP</h1>
+      <h1 className="opacity-50 pb-5 ">SIM SETUP</h1>
+
+      {/* Animation Speed (Pink Accent) */}
+      <section className="accent-pink">
+        <LabeledSlider
+          title="Animation Display Speed (ms)"
+          value={displaySpeed }
+          min={10}
+          max={1000}
+          step={10}
+          onChange={setDisplaySpeed}
+          color="var(--color-pink-300)"
+        />
+      </section>
 
       {/* Size Slider (Blue Accent) */}
       <LabeledSlider
@@ -209,7 +234,6 @@ function SideBar() {
         </Select>
       </FormControl>
 
-      <h1 className="opacity-50 pb-5">HYPERPARAMETERS</h1>
 
       {/* Number of Episodes (Pink Accent) */}
       <section className="accent-pink">
@@ -259,11 +283,10 @@ function SideBar() {
         color="var(--color-sky-300)"
       />
 
-      <h1 className="opacity-50 pb-5">CHECKPOINTS</h1>
       {/* Checkpoint Slider (Blue Accent) */}
       <section className="accent-pink">
         <LabeledSlider
-          title="Every X EPS "
+          title="Check Point Every X EPS "
           value={checkpointsEvery}
           min={1}
           max={numEpisodes}
@@ -275,11 +298,12 @@ function SideBar() {
     </div>
   );
 }
-function TableViews() {
-  const grid = makeDummyGrid(5);
 
-  // TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
-  function handleCellClick() {}
+interface TableViewsProp{
+  grid:GridData; 
+  handleCellClick:(row:number, col:number)=> void ; 
+}
+function TableViews({grid, handleCellClick}:TableViewsProp) {
 
   return (
     <div className="h-full border-b border-theme-border grid grid-cols-3">
@@ -308,14 +332,18 @@ function TableViews() {
     </div>
   );
 }
-function ResultGraphs() {
+
+interface ResultGraphsProps{
+  episodeHistory:TrainingUpdate[]; 
+}
+function ResultGraphs({episodeHistory}:ResultGraphsProps) {
   return (
     /* Change flex-col to h-full and remove extra padding that might shrink the chart area */
     <div className="h-full w-full flex flex-row px-6 pb-6">
       <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
         <h1>Episode Return</h1>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={fakeData}>
+          <LineChart data={episodeHistory}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="var(--color-theme-border)"
@@ -363,7 +391,7 @@ function ResultGraphs() {
       <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
         <h1>% Policy Changed</h1>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={fakeData}>
+          <LineChart data={episodeHistory}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="var(--color-theme-border)"
@@ -402,7 +430,7 @@ function ResultGraphs() {
       <div className="flex-1 w-full bg-theme-panel p-4 rounded-lg border border-theme-border overflow-hidden">
         <h1>Episode Length</h1>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={fakeData}>
+          <LineChart data={episodeHistory}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="var(--color-theme-border)"
@@ -442,30 +470,129 @@ function ResultGraphs() {
   );
 }
 
+// TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
+function handleCellClick() {}
+
 function App() {
+  // currentUpdate → feeds GridPanel (grids re-render each drain tick)
+  // episodeHistory → feeds your charts (array grows over time)
+  // snapshots → feeds replay panel (available after training completes)
+  // status → controls which UI is visible
+  const [displaySpeed, setDisplaySpeed] = useState(600); // in milliseconds 
+  const { status, currentUpdate, episodeHistory, snapshots, connect } =
+    useTrainingSocket(displaySpeed);
+  const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
+    Algorithm.MONTE_CARLO,
+  );
+  const [simMode, setSimMode] = useState<SimulationMode>("editing");
+
+  const [epsilon, setEpsilon] = useState(0.1);
+  const [gamma, setGamma] = useState(0.9);
+  const [gridSize, setGridSize] = useState(5);
+  const [numEpisodes, setNumEpisodes] = useState(500);
+  const [checkpointsEvery, setCheckpointsEvery] = useState(
+    Math.trunc(numEpisodes / 2),
+  );
+  const [paintingMode, setPaintingMode] = useState("wall");
+  const [stepLimit, setStepLimit] = useState(500);
+
+  const grid = makeDummyGrid(5);
+  
+  useEffect(() => {
+    // if changes to training, start the agent at start then begin training
+    // else clear env for next training round
+    if (simMode == "training") {
+      // send hyper params to backend and start populating the graphs based on web socket data
+      console.log("Start Training");
+      startTraining(); 
+    } else {
+      console.log("Editing World");
+    }
+  }, [simMode]); 
+
+  function extractGridInfo(){
+      let obstacleList: number[][] = Array.from ({length:gridSize}, () => Array(gridSize).fill(0))
+
+      let startPos : number[] = [0,0] 
+      let terminalPos: number[] = [gridSize-1, gridSize-1];
+      
+      for (let row= 0 ; row<gridSize ; row++){
+        for (let col = 0 ; col <gridSize ; col++ ){
+          if (grid[row][col].type =='wall')
+            obstacleList[row][col] = 1
+        }
+      }
+
+      return {startPos, terminalPos, obstacleList}
+  }
+
+  function startTraining(){
+    // get config as an object 
+    //based on gridData, get a 2d list of objects, the start pos , and end pos 
+    const {startPos , terminalPos, obstacleList} = extractGridInfo(); 
+    let config = {
+      env_size : gridSize,
+      obstacles: obstacleList,
+      terminal:terminalPos,
+      start:startPos,
+      epsilon,
+      gamma,
+      checkpoint_every: checkpointsEvery,
+      episodes:numEpisodes,
+      algorithm:selectedAlgo,
+      step_limit:stepLimit,
+    }
+    console.log(config); 
+    // connect to websocket 
+  }
+
+  
+
   return (
     <div className="h-screen w-full flex flex-col bg-theme-bg text-theme-text">
       {/* Header: 10% */}
       <div className="h-[10%] shrink-0">
-        <TopRow />
+        <TopRow
+          selectedAlgo={selectedAlgo}
+          setAlgo={setAlgo}
+          simMode={simMode}
+          setSimMode={setSimMode}
+        />
       </div>
 
       <div className="flex-1 flex flex-row overflow-hidden">
         {/* Sidebar: 20% width */}
         <div className="w-[20%] shrink-0">
-          <SideBar />
+          <SideBar
+            epsilon={epsilon}
+            setEpsilon={setEpsilon}
+            gamma={gamma}
+            setGamma={setGamma}
+            gridSize={gridSize}
+            setGridSize={setGridSize}
+            numEpisodes={numEpisodes}
+            setNumEpisodes={setNumEpisodes}
+            checkpointsEvery={checkpointsEvery}
+            setCheckpointsEvery={setCheckpointsEvery}
+            paintingMode={paintingMode}
+            setPaintingMode={setPaintingMode}
+            stepLimit={stepLimit}
+            setStepLimit={setStepLimit}
+            displaySpeed={displaySpeed}
+            setDisplaySpeed={setDisplaySpeed}
+          />
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Table Area: Fixed 60% of the parent height */}
           <div className="h-[60%] shrink-0 border-b border-theme-border p-4 overflow-auto">
-            <TableViews />
+            <TableViews grid={grid} handleCellClick={handleCellClick} />
           </div>
 
           {/* Graphs Area: Fills the remaining ~30% */}
           <div className="flex-1 min-h-0 bg-theme-panel">
-            <ResultGraphs />
+            <ResultGraphs episodeHistory={episodeHistory} />
           </div>
         </div>
       </div>
