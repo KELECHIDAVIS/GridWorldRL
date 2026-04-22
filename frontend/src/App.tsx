@@ -7,7 +7,7 @@ import {
   type TrainingUpdate,
 } from "./types";
 import { LabeledSlider } from "./components/LabeledSlider";
-import type { ArrowDirection, GridData, CellData } from "./types";
+import type { ArrowDirection, GridData, CellData, CellType } from "./types";
 import { GridPanel } from "./components/GridPanel";
 import { Select, type SelectChangeEvent } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
@@ -528,7 +528,7 @@ function App() {
   const [checkpointsEvery, setCheckpointsEvery] = useState(
     Math.max(1, Math.trunc(numEpisodes / 10)),
   );
-  const [paintingMode, setPaintingMode] = useState("wall");
+  const [paintingMode, setPaintingMode] = useState<CellType>("wall");
   const [stepLimit, setStepLimit] = useState(500);
 
   const initialGrid: GridData = makeDummyGrid(gridSize);
@@ -597,8 +597,20 @@ function App() {
     connect(config);
   }
   // TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
+  function updateGridElement (rowIndex: number, colIndex: number, cellData : CellData){
+    setGrid((prevGrid) =>
+      prevGrid.map((row, rIdx) =>
+        rIdx === rowIndex
+          ? row.map((col, cIdx) => (cIdx === colIndex ? cellData : col))
+          : row,
+      ),
+    );
+  }
   function handleCellClick(row: number, col: number) {
-    console.log({ row, col });
+    if (paintingMode == 'wall'){
+       updateGridElement(row, col, {type:'wall', row, col});
+    }
+    
   }
 
   return (
