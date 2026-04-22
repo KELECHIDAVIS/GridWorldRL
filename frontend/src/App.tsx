@@ -518,8 +518,14 @@ function App() {
       
       for (let row= 0 ; row<gridSize ; row++){
         for (let col = 0 ; col <gridSize ; col++ ){
-          if (grid[row][col].type =='wall')
-            obstacleList[row][col] = 1
+          if (grid[row][col].type == "wall") obstacleList[row][col] = 1;
+          else if (grid[row][col].type == "start") {
+            startPos[0] = row;
+            startPos[1] = col;
+          } else if (grid[row][col].type == "goal") {
+            terminalPos[0] = row;
+            terminalPos[1] = col;
+          }
         }
       }
 
@@ -544,6 +550,7 @@ function App() {
     }
     console.log(config); 
     // connect to websocket 
+    connect(config)
   }
 
   
