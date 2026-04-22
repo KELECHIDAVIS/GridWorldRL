@@ -31,9 +31,10 @@ interface TopRowProps {
   setAlgo: (algo: AlgorithmType) => void;
   simMode: SimulationMode;
   setSimMode: (mode: SimulationMode) => void;
+  disabled:boolean // only for algo selection 
 }
 // Example of a child component using the new dynamic classes
-function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
+function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode , disabled }: TopRowProps) {
   return (
     <div className="h-full w-full p-4 border-b border-theme-border flex flex-row justify-between items-center bg-theme-panel">
       {/* title */}
@@ -54,6 +55,7 @@ function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
             selectedValue={selectedAlgo}
             onChange={setAlgo}
             name="algo-group"
+            disabled={disabled}
           />
           <RadioCard
             name="algo-group"
@@ -62,6 +64,7 @@ function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
             value={Algorithm.Q_LEARNING}
             selectedValue={selectedAlgo}
             onChange={setAlgo}
+            disabled={disabled}
           />
           <RadioCard
             label="SARSA"
@@ -70,6 +73,7 @@ function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
             selectedValue={selectedAlgo}
             onChange={setAlgo}
             name="algo-group"
+            disabled={disabled}
           />
         </div>
       </section>
@@ -77,7 +81,7 @@ function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
       {/* Simulation Mode Group */}
       <section className="flex flex-row items-center gap-3 accent-pink">
         <h2 className="font-bold mb-4 text-theme-text opacity-50 uppercase text-xs tracking-widest">
-          Sim Mode
+          Simulation Mode
         </h2>
         <div className="flex flex-row gap-3">
           <RadioCard
@@ -87,6 +91,7 @@ function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode }: TopRowProps) {
             value="editing"
             selectedValue={simMode}
             onChange={setSimMode}
+
           />
           <RadioCard
             name="mode-group"
@@ -119,6 +124,7 @@ interface SideBarProps {
   setStepLimit: (stepL: number) => void;
   displaySpeed: number;
   setDisplaySpeed: (speed: number) => void;
+  disabled: boolean 
 }
 function SideBar({
   epsilon,
@@ -137,6 +143,7 @@ function SideBar({
   setStepLimit,
   displaySpeed,
   setDisplaySpeed,
+  disabled
 }: SideBarProps) {
   useEffect(() => {
     // If the number of episodes becomes smaller than our checkpoint interval,
@@ -163,6 +170,7 @@ function SideBar({
           step={10}
           onChange={setDisplaySpeed}
           color="var(--color-pink-300)"
+          disabled={disabled}
         />
       </section>
 
@@ -175,6 +183,7 @@ function SideBar({
         step={1}
         onChange={setGridSize}
         color="var(--color-sky-300)"
+        disabled={disabled}
       />
 
       {/* make paint mode selection */}
@@ -218,6 +227,7 @@ function SideBar({
           value={paintingMode}
           onChange={handlePaintingChange}
           autoWidth
+          disabled={disabled}
           label="Paint"
           MenuProps={{
             slotProps: {
@@ -258,6 +268,7 @@ function SideBar({
           step={10}
           onChange={setNumEpisodes}
           color="var(--color-pink-300)"
+          disabled={disabled}
         />
       </section>
 
@@ -270,6 +281,7 @@ function SideBar({
         step={0.01}
         onChange={setEpsilon}
         color="var(--color-sky-300)"
+        disabled={disabled}
       />
 
       {/* Gamma Slider (Pink Accent) */}
@@ -282,6 +294,7 @@ function SideBar({
           step={0.01}
           onChange={setGamma}
           color="var(--color-pink-300)"
+          disabled={disabled}
         />
       </section>
 
@@ -294,6 +307,7 @@ function SideBar({
         step={1}
         onChange={setStepLimit}
         color="var(--color-sky-300)"
+        disabled={disabled}
       />
 
       {/* Checkpoint Slider (Blue Accent) */}
@@ -306,6 +320,7 @@ function SideBar({
           step={1}
           onChange={setCheckpointsEvery}
           color="var(--color-pink-300)"
+          disabled={disabled}
         />
       </section>
     </div>
@@ -496,7 +511,7 @@ function App() {
   // snapshots → feeds replay panel (available after training completes)
   // status → controls which UI is visible
   const [displaySpeed, setDisplaySpeed] = useState(600); // in milliseconds
-  const { status, currentUpdate, episodeHistory, snapshots, connect } =
+  const { status, currentUpdate, episodeHistory, snapshots, connect, reset } =
     useTrainingSocket(displaySpeed);
   const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
     Algorithm.MONTE_CARLO,
@@ -522,16 +537,19 @@ function App() {
   const [grid, setGrid] = useState<GridData>(initialGrid);
   // fill the tables relevant data in Griddata form based on current update 
   const displayGrid = currentUpdate ? applyTrainingUpdate(grid, currentUpdate) : grid
-
+  const isTraining = simMode === 'training' 
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
     // else clear env for next training round
     if (simMode == "training") {
       // send hyper params to backend and start populating the graphs based on web socket data
-      console.log("Start Training");
       startTraining();
     } else {
-      console.log("Editing World");
+      reset()
+      const newGrid = makeSimpleGrid(gridSize);
+      setGrid(newGrid);
+      setStartPos([0, 0]);
+      setGoalPos([gridSize - 1, gridSize - 1]);
     }
   }, [simMode]);
 
@@ -620,6 +638,10 @@ function App() {
   // have to make sure that start and goal isn't overriden by painting
   //TODO: a little ineffecient having to iterate through the list every time painting to search but too lazy to refactor file :/
   function handleCellClick(row: number, col: number) {
+    
+    if (simMode != 'editing')
+      return;
+
     const isProtected =
       sameCoords([row, col], startPos) || sameCoords([row, col], goalPos);
 
@@ -658,6 +680,7 @@ function App() {
           setAlgo={setAlgo}
           simMode={simMode}
           setSimMode={setSimMode}
+          disabled={isTraining}
         />
       </div>
 
@@ -681,6 +704,7 @@ function App() {
             setStepLimit={setStepLimit}
             displaySpeed={displaySpeed}
             setDisplaySpeed={setDisplaySpeed}
+            disabled={isTraining}
           />
         </div>
 
@@ -688,12 +712,17 @@ function App() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Table Area: Fixed 60% of the parent height */}
           <div className="h-[60%] shrink-0 border-b border-theme-border p-4 overflow-auto">
-            <TableViews grid={displayGrid} handleCellClick={handleCellClick} />
+            <TableViews
+              grid={displayGrid}
+              handleCellClick={handleCellClick}
+            />
           </div>
 
           {/* Graphs Area: Fills the remaining ~30% */}
           <div className="flex-1 min-h-0 bg-theme-panel">
-            <ResultGraphs episodeHistory={episodeHistory} />
+            <ResultGraphs
+              episodeHistory={episodeHistory}
+            />
           </div>
         </div>
       </div>

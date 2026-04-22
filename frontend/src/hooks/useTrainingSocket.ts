@@ -74,5 +74,15 @@ export function useTrainingSocket(displaySpeed: number) {
     [drainQueue],
   );
 
-  return { status, currentUpdate, episodeHistory, snapshots, connect };
+  const reset = useCallback(() => {
+    queueRef.current = [];
+    serverDoneRef.current = false;
+    setEpisodeHistory([]);
+    setCurrentUpdate(null);
+    setSnapshots({});
+    setStatus("idle");
+    if (drainRef.current) clearInterval(drainRef.current);
+  }, []);
+
+  return { status, currentUpdate, episodeHistory, snapshots, connect , reset};
 }

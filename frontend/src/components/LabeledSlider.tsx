@@ -9,6 +9,7 @@ interface LabeledSliderProps {
   step?: number;
   onChange: (newValue: number) => void;
   color?: string; 
+  disabled:boolean 
 }
 
 export const LabeledSlider: React.FC<LabeledSliderProps> = ({
@@ -18,7 +19,8 @@ export const LabeledSlider: React.FC<LabeledSliderProps> = ({
   max,
   step = 1,
   onChange,
-  color = 'var(--color-accent)' // Uses your global accent variable
+  color = 'var(--color-accent)', // Uses your global accent variable
+  disabled
 }) => {
   return (
     <div className="w-full mb-6">
@@ -39,6 +41,7 @@ export const LabeledSlider: React.FC<LabeledSliderProps> = ({
         max={max}
         step={step}
         onChange={(_, newValue) => onChange(newValue as number)}
+        disabled = {disabled}
         sx={{
           color: color,
           padding: '13px 0', // MUI default padding
