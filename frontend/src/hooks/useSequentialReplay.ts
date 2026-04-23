@@ -95,25 +95,10 @@ export function useSequentialReplay(
     });
   }
 
-  const drainReplays = useCallback(() => {
-    intervalRef.current = setInterval(() => {
-      const currentAgent = agentRef.current;
-
-      if (!currentAgent) {
-        spawnNext();
-      } else if (currentAgent.done) {
-        // FIX 3: Clear the agent to create a visual "break" between generations
-        setAgentSync(null);
-      } else {
-        setAgentSync(stepAgent(currentAgent, goalPos));
-      }
-    }, displaySpeed);
-  }, [displaySpeed, goalPos]);
-
   function startReplay() {
     const ordered = Object.entries(snapshots)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      .filter(([, snap]) => snap.policy_changed_pct !== 0)
+      // REMOVED: The strict policy_changed_pct filter
       .map(([ep, snap]) => ({
         episode: parseInt(ep),
         policy: snap.policy,
@@ -124,6 +109,22 @@ export function useSequentialReplay(
     setStatus("playing");
     drainReplays();
   }
+
+  const drainReplays = useCallback(() => {
+    intervalRef.current = setInterval(() => {
+      const currentAgent = agentRef.current;
+
+      if (!currentAgent) {
+        spawnNext();
+      } else if (currentAgent.done) {
+        // Clear the agent and wait one tick before spawning the next
+        // This creates a visual "blink" that makes the transition clear
+        setAgentSync(null);
+      } else {
+        setAgentSync(stepAgent(currentAgent, goalPos));
+      }
+    }, displaySpeed);
+  }, [displaySpeed, goalPos]);
 
   function reset() {
     if (intervalRef.current) {

@@ -43,14 +43,22 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
     )
   }
 
-  if (data.type === 'agent') {
+  if (data.type === "agent") {
     return (
       <div
-        className={`${base} rounded-full border-2`}
-        style={{ borderColor: data.agentColor, background: `${data.agentColor}22`, fontSize: 'var(--cell-font-size)'  }}
-        onClick={()=> onClick(data.row, data.col)}
-      />
-    )
+        className={`${base} rounded-full border-2 flex items-center justify-center font-bold`}
+        style={{
+          borderColor: data.agentColor,
+          background: `${data.agentColor}22`,
+          color: data.agentColor, // Make the text color match the border
+          fontSize: "var(--cell-font-size)",
+        }}
+        onClick={() => onClick(data.row, data.col)}
+      >
+        {data.value}{" "}
+        {/* This renders the episode number passed from GridPanel */}
+      </div>
+    );
   }
 
   // empty cell -- render differently based on display mode
