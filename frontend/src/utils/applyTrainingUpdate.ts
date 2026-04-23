@@ -53,5 +53,23 @@ export function applyTrainingUpdate(
     if (r < 0 || r >= newGrid.length || c < 0 || c >= newGrid[0].length) break;
   }
 
+  // normalize all values that the heatmap makes more sense
+  const allValues = newGrid
+    .flat()
+    .filter((c) => c.type === "empty" && c.value !== undefined)
+    .map((c) => c.value as number);
+
+  if (allValues.length > 0) {
+    const min = Math.min(...allValues); // most negative = worst
+    const max = Math.max(...allValues); // least negative = best
+
+    return newGrid.map((row) =>
+      row.map((cell) => {
+        if (cell.type !== "empty" || cell.value === undefined) return cell;
+        const normalized = min === max ? 0.5 : (cell.value - min) / (max - min);
+        return { ...cell, value: normalized, rawValue: cell.value };
+      }),
+    );
+  }
   return newGrid;
 }

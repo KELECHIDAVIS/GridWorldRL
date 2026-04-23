@@ -364,6 +364,27 @@ interface ResultGraphsProps {
   episodeHistory: TrainingUpdate[];
 }
 function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
+
+  function computeTicks(values: number[], count = 5): number[] {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (min === max) return [min];
+    return Array.from(
+      { length: count },
+      (_, i) => min + (i / (count - 1)) * (max - min),
+    );
+  }
+
+  const episodeReturnTicks = computeTicks(
+    episodeHistory.map((e) => e.episode_return),
+  );
+  const policyChangedTicks = computeTicks(
+    episodeHistory.map((e) => e.policy_changed_pct),
+  );
+  const episodeLengthTicks = computeTicks(
+    episodeHistory.map((e) => e.episode_length),
+  );
+
   return (
     /* Change flex-col to h-full and remove extra padding that might shrink the chart area */
     <div className="h-full w-full flex flex-row px-6 pb-6">
@@ -378,14 +399,20 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
             />
             <XAxis
               dataKey="episode"
+              type="number"
+              domain={["dataMin", "dataMax"]}
+              allowDecimals={false}
               stroke="var(--color-theme-text)"
               opacity={0.5}
               tickLine={false}
+              tickCount={5}
             />
             <YAxis
+              ticks={episodeReturnTicks}
+              tickFormatter={(v) => v.toFixed(1)}
+              tickLine={false}
               stroke="var(--color-theme-text)"
               opacity={0.5}
-              tickLine={false}
             />
             <Tooltip
               formatter={(value) =>
@@ -429,14 +456,20 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
             />
             <XAxis
               dataKey="episode"
+              type="number"
+              domain={["dataMin", "dataMax"]}
+              allowDecimals={false}
               stroke="var(--color-theme-text)"
               opacity={0.5}
               tickLine={false}
+              tickCount={5}
             />
             <YAxis
+              ticks={policyChangedTicks}
+              tickFormatter={(v) => v.toFixed(1)}
+              tickLine={false}
               stroke="var(--color-theme-text)"
               opacity={0.5}
-              tickLine={false}
             />
             <Tooltip
               formatter={(value) =>
@@ -471,14 +504,20 @@ function ResultGraphs({ episodeHistory }: ResultGraphsProps) {
             />
             <XAxis
               dataKey="episode"
+              type="number"
+              domain={["dataMin", "dataMax"]}
+              allowDecimals={false}
               stroke="var(--color-theme-text)"
               opacity={0.5}
               tickLine={false}
+              tickCount={5}
             />
             <YAxis
+              ticks={episodeLengthTicks}
+              tickFormatter={(v) => v.toFixed(1)}
+              tickLine={false}
               stroke="var(--color-theme-text)"
               opacity={0.5}
-              tickLine={false}
             />
             <Tooltip
               formatter={(value) =>
@@ -538,6 +577,11 @@ function App() {
   // fill the tables relevant data in Griddata form based on current update 
   const displayGrid = currentUpdate ? applyTrainingUpdate(grid, currentUpdate,startPos, goalPos) : grid
   const isTraining = simMode === 'training' 
+
+  const uniqueHistory = episodeHistory.filter(
+    (entry, i, arr) => arr.findIndex((e) => e.episode === entry.episode) === i,
+  );
+
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
     // else clear env for next training round
@@ -671,6 +715,7 @@ function App() {
     }
   }
 
+
   return (
     <div className="h-screen w-full flex flex-col bg-theme-bg text-theme-text">
       {/* Header: 10% */}
@@ -721,7 +766,7 @@ function App() {
           {/* Graphs Area: Fills the remaining ~30% */}
           <div className="flex-1 min-h-0 bg-theme-panel">
             <ResultGraphs
-              episodeHistory={episodeHistory}
+              episodeHistory={uniqueHistory}
             />
           </div>
         </div>

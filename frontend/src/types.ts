@@ -20,6 +20,7 @@ export interface CellData {
   arrow?: ArrowDirection  // for policy display
   agentColor?: string   // for replay panel agents
   isGreedyPath?: boolean // highlights the optimal path
+  rawValue?:number
   row:number ; 
   col:number
 }

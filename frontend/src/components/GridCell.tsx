@@ -5,17 +5,13 @@ const ARROWS: Record<string, string> = {
   up: '↑', down: '↓', left: '←', right: '→'
 }
 
-// maps a value in [-1, 1] to a dark tinted color
+// value is now normalized [0, 1]: 0 = worst (far from goal), 1 = best (near goal)
 function valueToColor(value: number): string {
-  if (value > 0) {
-    const intensity = Math.round(value * 180)
-    return `rgb(${40 - Math.round(value*20)}, ${40 + intensity}, ${80 - Math.round(value*40)})`
-  } else {
-    const intensity = Math.round(-value * 180)
-    return `rgb(${40 + intensity}, ${35 - Math.round(-value*15)}, ${80 - Math.round(-value*40)})`
-  }
+  const r = Math.round(20 + (1 - value) * 180); // high red when bad
+  const g = Math.round(20 + value * 160);        // high green when good
+  const b = Math.round(80 - value * 60);
+  return `rgb(${r}, ${g}, ${b})`;
 }
-
 interface GridCellProps {
   data: CellData
   mode: DisplayMode
@@ -65,7 +61,7 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
         style={{ background: valueToColor(data.value), color: '#c2c0b6', fontSize: 'var(--cell-font-size)' }}
         onClick={()=> onClick(data.row, data.col)}
       >
-        {data.value.toFixed(2)}
+        {data.rawValue?.toFixed(2)}
       </div>
     )
   }
