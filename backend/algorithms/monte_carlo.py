@@ -27,23 +27,23 @@ def monte_carlo(env:Environment, agent:Agent, step_limit):
         G = agent.gamma * G + rewards[i]
 
         pair = states_actions[i]
-        if pair not in visited: #first visit 
-            visited.add(pair) 
+        if pair not in visited: # first visit 
+            visited.add(pair)
 
             state, action = pair
             row, col = state
 
-            # incremental average
             agent.returns_count[row, col, action] += 1
             n = agent.returns_count[row, col, action]
             agent.q_table[row, col, action] += (G - agent.q_table[row, col, action]) / n
 
-            # policy improvement
             best_action = np.argmax(agent.q_table[row, col])
             agent.policy[row, col] = agent.epsilon / len(possible_actions)
             agent.policy[row, col, best_action] += 1 - agent.epsilon
-       
-        visit_counts[pair[0] , pair[1]] += 1
+
+        state, action = pair          # unpack properly outside the block too
+        row, col = state
+        visit_counts[row, col] += 1
     
     episode_length = len (rewards)
 
