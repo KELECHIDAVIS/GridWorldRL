@@ -8,8 +8,10 @@ export function useTrainingSocket(displaySpeed: number) {
     null,
   ); // for heat maps
   const [episodeHistory, setEpisodeHistory] = useState<TrainingUpdate[]>([]); // for graphs
-  const [snapshots, setSnapshots] = useState<Record<string, number[][][]>>({}); // for replay
-  const [status, setStatus] = useState<"idle" | "training" | "complete">(
+  const [snapshots, setSnapshots] = useState<
+    Record<string, { policy: number[][][]; policy_changed_pct: number }>
+  >({}); // for replay
+  const [trainingStatus, setTrainingStatus] = useState<"idle" | "training" | "complete">(
     "idle",
   );
 
@@ -26,7 +28,7 @@ export function useTrainingSocket(displaySpeed: number) {
         // only stop and mark complete if server is also done sending 
         if (serverDoneRef.current){
             clearInterval(drainRef.current!)
-            setStatus('complete')
+            setTrainingStatus('complete')
         }
         return; // dont read from empty
       }
@@ -47,7 +49,7 @@ export function useTrainingSocket(displaySpeed: number) {
       setEpisodeHistory([]);
       setCurrentUpdate(null);
       setSnapshots({});
-      setStatus("training");
+      setTrainingStatus("training");
 
       const ws = new WebSocket("ws://localhost:8000/ws/train");
 
@@ -64,7 +66,7 @@ export function useTrainingSocket(displaySpeed: number) {
         }
         if (data.type === "complete") {
           setSnapshots(data.snapshots);
-          // the queue might still have episodes in it, so setting the status to complete happens in the drainQueue function
+          // the queue might still have episodes in it, so setting the trainingStatus to complete happens in the drainQueue function
           serverDoneRef.current = true;
         }
       };
@@ -80,9 +82,9 @@ export function useTrainingSocket(displaySpeed: number) {
     setEpisodeHistory([]);
     setCurrentUpdate(null);
     setSnapshots({});
-    setStatus("idle");
+    setTrainingStatus("idle");
     if (drainRef.current) clearInterval(drainRef.current);
   }, []);
 
-  return { status, currentUpdate, episodeHistory, snapshots, connect , reset};
+  return { trainingStatus, currentUpdate, episodeHistory, snapshots, connect , reset};
 }

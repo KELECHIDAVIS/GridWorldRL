@@ -7,7 +7,7 @@ import {
   type TrainingUpdate,
 } from "./types";
 import { LabeledSlider } from "./components/LabeledSlider";
-import type { ArrowDirection, GridData, CellData, CellType } from "./types";
+import type { ArrowDirection, GridData, CellData, CellType , ReplayAgent} from "./types";
 import { GridPanel } from "./components/GridPanel";
 import { Select, type SelectChangeEvent } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
@@ -25,6 +25,8 @@ import {
 } from "recharts";
 import { useTrainingSocket } from "./hooks/useTrainingSocket";
 import { applyTrainingUpdate } from "./utils/applyTrainingUpdate";
+import { useSequentialReplay } from "./hooks/useSequentialReplay";
+
 
 interface TopRowProps {
   selectedAlgo: AlgorithmType;
@@ -330,8 +332,9 @@ function SideBar({
 interface TableViewsProp {
   grid: GridData;
   handleCellClick: (row: number, col: number) => void;
+  activeAgent: ReplayAgent | null; 
 }
-function TableViews({ grid, handleCellClick }: TableViewsProp) {
+function TableViews({ grid, handleCellClick, activeAgent }: TableViewsProp) {
   return (
     <div className="h-full border-b border-theme-border grid grid-cols-3">
       <GridPanel
@@ -340,6 +343,7 @@ function TableViews({ grid, handleCellClick }: TableViewsProp) {
         data={grid}
         mode="replay"
         onCellClick={handleCellClick}
+        activeAgent = {activeAgent} 
       />
       <GridPanel
         title="Policy π(s)"
@@ -548,9 +552,9 @@ function App() {
   // currentUpdate → feeds GridPanel (grids re-render each drain tick)
   // episodeHistory → feeds your charts (array grows over time)
   // snapshots → feeds replay panel (available after training completes)
-  // status → controls which UI is visible
+  // trainingStatus → controls which UI is visible
   const [displaySpeed, setDisplaySpeed] = useState(600); // in milliseconds
-  const { status, currentUpdate, episodeHistory, snapshots, connect, reset } =
+  const { trainingStatus, currentUpdate, episodeHistory, snapshots, connect, reset: trainingReset } =
     useTrainingSocket(displaySpeed);
   const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
     Algorithm.MONTE_CARLO,
@@ -560,7 +564,7 @@ function App() {
   const [epsilon, setEpsilon] = useState(0.1);
   const [gamma, setGamma] = useState(0.99);
   const [gridSize, setGridSize] = useState(5);
-  const [numEpisodes, setNumEpisodes] = useState(2000);
+  const [numEpisodes, setNumEpisodes] = useState(800);
   const [checkpointsEvery, setCheckpointsEvery] = useState(
     Math.max(1, Math.trunc(numEpisodes / 40)), //TODO:change back to 10
   );
@@ -582,6 +586,8 @@ function App() {
     (entry, i, arr) => arr.findIndex((e) => e.episode === entry.episode) === i,
   );
 
+  const {activeAgent , status:replayStatus, startReplay, reset:replayReset } = useSequentialReplay(startPos, goalPos,displaySpeed, snapshots ); 
+  
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
     // else clear env for next training round
@@ -589,7 +595,8 @@ function App() {
       // send hyper params to backend and start populating the graphs based on web socket data
       startTraining();
     } else {
-      reset()
+      trainingReset() 
+      replayReset()
       const newGrid = makeSimpleGrid(gridSize);
       setGrid(newGrid);
       setStartPos([0, 0]);
@@ -657,7 +664,6 @@ function App() {
       algorithm: selectedAlgo,
       step_limit: stepLimit,
     };
-    console.log(config);
     // connect to websocket
     connect(config);
   }
@@ -679,8 +685,7 @@ function App() {
   function sameCoords(a: number[], b: number[]) {
     return a.length === b.length && a.every((val, index) => val === b[index]);
   }
-  // have to make sure that start and goal isn't overriden by painting
-  //TODO: a little ineffecient having to iterate through the list every time painting to search but too lazy to refactor file :/
+  
   function handleCellClick(row: number, col: number) {
     
     if (simMode != 'editing')
@@ -715,6 +720,14 @@ function App() {
     }
   }
 
+  //when the training is complete, the replay should start 
+  useEffect(()=>{
+    console.log("Current Training Status", trainingStatus)
+    if (trainingStatus=='complete'){
+      console.log("replay should have started")
+      startReplay(); 
+    }
+  },[trainingStatus])
 
   return (
     <div className="h-screen w-full flex flex-col bg-theme-bg text-theme-text">
@@ -760,6 +773,7 @@ function App() {
             <TableViews
               grid={displayGrid}
               handleCellClick={handleCellClick}
+              activeAgent={activeAgent}
             />
           </div>
 

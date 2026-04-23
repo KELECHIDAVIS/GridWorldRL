@@ -54,7 +54,10 @@ async def train(websocket: WebSocket):
 
         # save snapshot at checkpoints
         if episode % checkpoint_every == 0 or episode == config['episodes']- 1:
-            policy_snapshots[episode] = agent.policy.tolist()
+            policy_snapshots[episode] = {
+                "policy": agent.policy.tolist(),
+                "policy_changed_pct": policy_changed_pct
+            }
             
             # calculate all metrix needed for results graphs: epi
             await websocket.send_json({
