@@ -70,6 +70,7 @@ async def train(websocket: WebSocket):
             })
 
     # training done -- send all snapshots for replay
+    # could send policy changed percentage back too to see when to stop the replay. if the policy hasn't changed much for a long time should stop replaying.
     await websocket.send_json({
         'type': 'complete',
         'snapshots': {str(k): v for k, v in policy_snapshots.items()}
