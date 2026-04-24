@@ -167,9 +167,9 @@ function SideBar({
         <LabeledSlider
           title="Animation Display Speed (ms)"
           value={displaySpeed}
-          min={10}
-          max={1000}
-          step={10}
+          min={50}
+          max={2000}
+          step={50}
           onChange={setDisplaySpeed}
           color="var(--color-pink-300)"
           disabled={disabled}
@@ -180,8 +180,8 @@ function SideBar({
       <LabeledSlider
         title="Grid Size "
         value={gridSize}
-        min={2}
-        max={15}
+        min={3}
+        max={20}
         step={1}
         onChange={setGridSize}
         color="var(--color-sky-300)"
@@ -265,9 +265,9 @@ function SideBar({
         <LabeledSlider
           title="Number of Episodes"
           value={numEpisodes}
-          min={10}
-          max={3000}
-          step={10}
+          min={50}
+          max={5000}
+          step={100}
           onChange={setNumEpisodes}
           color="var(--color-pink-300)"
           disabled={disabled}
@@ -280,7 +280,7 @@ function SideBar({
         value={epsilon}
         min={0}
         max={1}
-        step={0.01}
+        step={0.05}
         onChange={setEpsilon}
         color="var(--color-sky-300)"
         disabled={disabled}
@@ -293,7 +293,7 @@ function SideBar({
           value={gamma}
           min={0}
           max={1}
-          step={0.01}
+          step={0.05}
           onChange={setGamma}
           color="var(--color-pink-300)"
           disabled={disabled}
@@ -304,9 +304,9 @@ function SideBar({
       <LabeledSlider
         title="Max Steps"
         value={stepLimit}
-        min={0}
+        min={10}
         max={1000}
-        step={1}
+        step={10}
         onChange={setStepLimit}
         color="var(--color-sky-300)"
         disabled={disabled}
@@ -352,9 +352,8 @@ function TableViews({ grid, handleCellClick, activeAgent }: TableViewsProp) {
         mode="policy"
         onCellClick={handleCellClick}
       />
-      {/* //TODO: Change this to reflect the Q, or change whats sent back to be V(S) */}
       <GridPanel
-        title="Value table Q(s,a)"
+        title="Value table V(s)"
         tag="heatmap"
         data={grid}
         mode="value"
@@ -553,7 +552,7 @@ function App() {
   // episodeHistory → feeds your charts (array grows over time)
   // snapshots → feeds replay panel (available after training completes)
   // trainingStatus → controls which UI is visible
-  const [displaySpeed, setDisplaySpeed] = useState(600); // in milliseconds
+  const [displaySpeed, setDisplaySpeed] = useState(300); // in milliseconds
   const { trainingStatus, currentUpdate, episodeHistory, snapshots, connect, reset: trainingReset } =
     useTrainingSocket(displaySpeed);
   const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
@@ -562,14 +561,12 @@ function App() {
   const [simMode, setSimMode] = useState<SimulationMode>("editing");
 
   const [epsilon, setEpsilon] = useState(0.1);
-  const [gamma, setGamma] = useState(0.99);
-  const [gridSize, setGridSize] = useState(5);
-  const [numEpisodes, setNumEpisodes] = useState(800);
-  const [checkpointsEvery, setCheckpointsEvery] = useState(
-    Math.max(1, Math.trunc(numEpisodes / 40)), //TODO:change back to 10
-  );
+  const [gamma, setGamma] = useState(0.95);
+  const [gridSize, setGridSize] = useState(7);
+  const [numEpisodes, setNumEpisodes] = useState(1000);
+  const [checkpointsEvery, setCheckpointsEvery] = useState(50);
   const [paintingMode, setPaintingMode] = useState<CellType>("wall");
-  const [stepLimit, setStepLimit] = useState(200);
+  const [stepLimit, setStepLimit] = useState(150);
 
   const [startPos, setStartPos] = useState<[number, number]>([0, 0]);
   const [goalPos, setGoalPos] = useState<[number, number]>([
