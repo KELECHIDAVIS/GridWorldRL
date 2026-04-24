@@ -46,17 +46,17 @@ export function GridCell({ data, mode, onClick  }: GridCellProps) {
   if (data.type === "agent") {
     return (
       <div
-        className={`${base} rounded-full border-2 flex items-center justify-center font-bold`}
+        // Adding transition-none overrides the transition-all in base
+        className={`${base} rounded-full border-2 transition-none`}
         style={{
           borderColor: data.agentColor,
-          background: `${data.agentColor}22`,
-          color: data.agentColor, // Make the text color match the border
+          background: `${data.agentColor}44`, // Increased opacity for the agent itself
+          color: data.agentColor, // Ensure the number uses the agent color
           fontSize: "var(--cell-font-size)",
         }}
         onClick={() => onClick(data.row, data.col)}
       >
-        {data.value}{" "}
-        {/* This renders the episode number passed from GridPanel */}
+        {data.value}
       </div>
     );
   }
