@@ -11,6 +11,20 @@ type ReplaySnapshot = {
   policy_changed_pct: number;
 };
 
+/**
+ * Interpolates between Deep Purple (270°) and Gold/Orange (45°)
+ * p: progress from 0.0 to 1.0
+ */
+function getProgressColor(p: number): string {
+  // Hue: 270 (Purple) -> 405 (which is 45° Orange, but we go 
+  // clockwise for a smoother transition through pinks/reds)
+  const h = 270 + p * 135; 
+  const s = 50 + p * 40;   // 50% -> 90% (gets more vivid)
+  const l = 30 + p * 30;   // 30% -> 60% (gets brighter)
+  
+  return `hsl(${h % 360}, ${s}%, ${l}%)`;
+}
+
 function stepAgent(agent: ReplayAgent, goalPos: [number, number], grid:GridData): ReplayAgent {
   const [r, c] = agent.pos;
   const actions = agent.policy[r]?.[c];
@@ -85,10 +99,14 @@ export function useSequentialReplay(
 
     const next = queueRef.current.shift()!;
 
+    // Calculate progress (0.0 to 1.0)
+    const progress = next.episode / maxEpisodeRef.current;
+    const assignedColor = getProgressColor(progress);
+
     setAgentSync({
       id: next.episode,
       pos: [...startPos] as [number, number],
-      color: AGENT_COLORS[next.episode % AGENT_COLORS.length],
+      color: assignedColor, // <--- Dynamic Color!
       policy: next.policy,
       steps: 0,
       done: false,
@@ -96,10 +114,18 @@ export function useSequentialReplay(
     });
   }, [startPos]);
 
+  const maxEpisodeRef = useRef<number>(1);
+
   function startReplay() {
-    const ordered = Object.entries(snapshots)
+    const entries = Object.entries(snapshots);
+    if (entries.length === 0) return;
+
+    // find the highest episode number to use as our 100% mark
+    maxEpisodeRef.current = Math.max(...entries.map(([ep]) => parseInt(ep)));
+
+    const ordered = entries
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      // REMOVED: The strict policy_changed_pct filter
+      
       .map(([ep, snap]) => ({
         episode: parseInt(ep),
         policy: snap.policy,

@@ -23,8 +23,6 @@ async def train(websocket: WebSocket):
     env.obstacles = np.array(config['obstacles'])
     env.terminal = tuple(config['terminal'])
     
-    print(env.obstacles) #TODO:REMOVE 
-
     start = tuple(config['start'])
     agent = Agent(env.size, start=start, epsilon=config['epsilon'], gamma=config['gamma'])
 
