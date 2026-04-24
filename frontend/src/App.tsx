@@ -361,7 +361,7 @@ function App() {
     (entry, i, arr) => arr.findIndex((e) => e.episode === entry.episode) === i,
   );
 
-  const {activeAgent , status:replayStatus, startReplay, reset:replayReset } = useSequentialReplay(startPos, goalPos,displaySpeed, snapshots ); 
+  const {activeAgent , status:replayStatus, startReplay, reset:replayReset } = useSequentialReplay(startPos, goalPos,displaySpeed, snapshots , grid); 
   
   useEffect(() => {
     // if changes to training, start the agent at start then begin training

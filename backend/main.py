@@ -13,7 +13,6 @@ class StateAction(BaseModel):
 class Algorithm(IntEnum):
     MONTE_CARLO = 0 
 
-#TODO:add a max steps limit so that it's not inf  
 @app.websocket('/ws/train')
 async def train(websocket: WebSocket):
     await websocket.accept()
@@ -23,6 +22,8 @@ async def train(websocket: WebSocket):
     env = Environment(size=config['env_size'])
     env.obstacles = np.array(config['obstacles'])
     env.terminal = tuple(config['terminal'])
+    
+    print(env.obstacles) #TODO:REMOVE 
 
     start = tuple(config['start'])
     agent = Agent(env.size, start=start, epsilon=config['epsilon'], gamma=config['gamma'])

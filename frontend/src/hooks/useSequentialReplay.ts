@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import type { ReplayAgent } from "../types";
+import type { GridData, ReplayAgent } from "../types";
 
 const AGENT_COLORS = ["#a78bfa", "#34d399", "#fb923c", "#60a5fa", "#f472b6"];
 const ROW_DELTAS = [-1, 0, 1, 0]; // 0=up 1=right 2=down 3=left
@@ -11,7 +11,7 @@ type ReplaySnapshot = {
   policy_changed_pct: number;
 };
 
-function stepAgent(agent: ReplayAgent, goalPos: [number, number]): ReplayAgent {
+function stepAgent(agent: ReplayAgent, goalPos: [number, number], grid:GridData): ReplayAgent {
   const [r, c] = agent.pos;
   const actions = agent.policy[r]?.[c];
 
@@ -29,8 +29,8 @@ function stepAgent(agent: ReplayAgent, goalPos: [number, number]): ReplayAgent {
   let newC = c + COL_DELTAS[bestAction];
   const gridSize = agent.policy.length;
 
-  // FIX 2: Bounce off boundaries instead of instant death
-  if (newR < 0 || newR >= gridSize || newC < 0 || newC >= gridSize) {
+  // if the agent runs into a wall, it should keep them in the same pos 
+  if ((newR < 0 || newR >= gridSize || newC < 0 || newC >= gridSize) || grid[newR][newC].type == 'wall') {
     newR = r;
     newC = c;
   }
@@ -62,6 +62,7 @@ export function useSequentialReplay(
     string,
     { policy: number[][][]; policy_changed_pct: number }
   >,
+  grid:GridData
 ) {
   const intervalRef = useRef<number | null>(null);
   const queueRef = useRef<ReplaySnapshot[]>([]);
@@ -121,10 +122,10 @@ export function useSequentialReplay(
         // This creates a visual "blink" that makes the transition clear
         setAgentSync(null);
       } else {
-        setAgentSync(stepAgent(currentAgent, goalPos));
+        setAgentSync(stepAgent(currentAgent, goalPos, grid));
       }
     }, displaySpeed);
-  }, [displaySpeed, goalPos, spawnNext]);
+  }, [displaySpeed, goalPos, spawnNext, grid]);
 
   function reset() {
     if (intervalRef.current) {
