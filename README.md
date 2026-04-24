@@ -1,2 +1,2 @@
 # GridWorldRL
-A web visualizer that display differnt reinforcement learning algorithms in a grid world
+A web visualizer that displays how different reinforcement learning algorithms perform in a grid world.
