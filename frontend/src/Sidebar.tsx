@@ -5,6 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import { useEffect } from "react";
+import type { CellType } from "./types";
 
 interface SideBarProps {
   epsilon: number;

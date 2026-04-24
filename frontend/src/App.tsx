@@ -344,7 +344,7 @@ function App() {
   const [numEpisodes, setNumEpisodes] = useState(1000);
   const [checkpointsEvery, setCheckpointsEvery] = useState(50);
   const [paintingMode, setPaintingMode] = useState<CellType>("wall");
-  const [stepLimit, setStepLimit] = useState(150);
+  const [stepLimit, setStepLimit] = useState(200);
 
   const [startPos, setStartPos] = useState<[number, number]>([0, 0]);
   const [goalPos, setGoalPos] = useState<[number, number]>([
@@ -498,9 +498,8 @@ function App() {
 
   //when the training is complete, the replay should start 
   useEffect(()=>{
-    console.log("Current Training Status", trainingStatus)
     if (trainingStatus=='complete'){
-      console.log("replay should have started")
+      console.log("Start Pos:", ...startPos)
       startReplay(); 
     }
   },[trainingStatus])

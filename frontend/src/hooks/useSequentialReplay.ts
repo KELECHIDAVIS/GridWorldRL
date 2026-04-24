@@ -74,7 +74,7 @@ export function useSequentialReplay(
     setActiveAgent(newAgent);
   };
 
-  function spawnNext() {
+  const spawnNext = useCallback(() => {
     if (queueRef.current.length === 0) {
       clearInterval(intervalRef.current!);
       setStatus("done");
@@ -93,7 +93,7 @@ export function useSequentialReplay(
       done: false,
       visited: new Set([`${startPos[0]},${startPos[1]}`]),
     });
-  }
+  }, [startPos]);
 
   function startReplay() {
     const ordered = Object.entries(snapshots)
@@ -124,7 +124,7 @@ export function useSequentialReplay(
         setAgentSync(stepAgent(currentAgent, goalPos));
       }
     }, displaySpeed);
-  }, [displaySpeed, goalPos]);
+  }, [displaySpeed, goalPos, spawnNext]);
 
   function reset() {
     if (intervalRef.current) {
