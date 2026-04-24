@@ -305,7 +305,7 @@ function SideBar({
         title="Max Steps"
         value={stepLimit}
         min={10}
-        max={1000}
+        max={2000}
         step={10}
         onChange={setStepLimit}
         color="var(--color-sky-300)"
