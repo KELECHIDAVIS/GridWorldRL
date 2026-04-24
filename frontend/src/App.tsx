@@ -594,10 +594,11 @@ function App() {
     } else {
       trainingReset() 
       replayReset()
-      const newGrid = makeSimpleGrid(gridSize);
-      setGrid(newGrid);
-      setStartPos([0, 0]);
-      setGoalPos([gridSize - 1, gridSize - 1]);
+      // make sure obstacles aren't just reset 
+      // const newGrid = makeSimpleGrid(gridSize);
+      // setGrid(newGrid);
+      // setStartPos([0, 0]);
+      // setGoalPos([gridSize - 1, gridSize - 1]);
     }
   }, [simMode]);
 
