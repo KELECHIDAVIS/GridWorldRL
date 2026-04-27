@@ -20,7 +20,7 @@ class Agent():
         self.gamma = gamma
         self.epsilon = epsilon
     #based on policy for probabilities of the action at that state, return the action chosen 
-    #TODO: can make episilon soft and greedy versions later 
+    #TODO: can make episilon soft and greedy versions later; the book says pick a from state derived from Q (e.g., episilon - greedy ) so the choice could be arbitrary
     def get_action(self): 
         row, col = self.state 
         #the probs should sum to one 
