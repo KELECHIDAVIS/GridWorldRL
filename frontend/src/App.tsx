@@ -330,7 +330,7 @@ function App() {
   // episodeHistory → feeds your charts (array grows over time)
   // snapshots → feeds replay panel (available after training completes)
   // trainingStatus → controls which UI is visible
-  const [displaySpeed, setDisplaySpeed] = useState(300); // in milliseconds
+  const [displaySpeed, setDisplaySpeed] = useState(500); // in milliseconds
   const { trainingStatus, currentUpdate, episodeHistory, snapshots, connect, reset: trainingReset } =
     useTrainingSocket(displaySpeed);
   const [selectedAlgo, setAlgo] = useState<AlgorithmType>(
@@ -340,7 +340,7 @@ function App() {
 
   const [epsilon, setEpsilon] = useState(0.1);
   const [gamma, setGamma] = useState(0.95);
-  const [gridSize, setGridSize] = useState(7);
+  const [gridSize, setGridSize] = useState(5);
   const [numEpisodes, setNumEpisodes] = useState(1000);
   const [checkpointsEvery, setCheckpointsEvery] = useState(50);
   const [paintingMode, setPaintingMode] = useState<CellType>("wall");
