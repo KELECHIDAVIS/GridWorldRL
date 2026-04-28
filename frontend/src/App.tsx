@@ -58,7 +58,7 @@ function TopRow({ selectedAlgo, setAlgo, simMode, setSimMode , disabled }: TopRo
           <RadioCard
             name="algo-group"
             label="Q-Learning"
-            description="Temporal Difference"
+            description="Off-Policy, TD Control"
             value={Algorithm.Q_LEARNING}
             selectedValue={selectedAlgo}
             onChange={setAlgo}
@@ -443,7 +443,7 @@ function App() {
     // connect to websocket
     connect(config);
   }
-  // TODO: depending on the mode will, add obstacles, move start, and stop; walls on one will reflect walls on all since they are all based on the replay grid
+  
   function updateGridElement(
     rowIndex: number,
     colIndex: number,
