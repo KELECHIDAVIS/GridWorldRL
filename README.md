@@ -145,7 +145,7 @@ Below are example runs showing the convergence results for all three algorithms 
 | ------------------------------------------------- | ------------------------------------------ | -------------------------------- |
 | ![Monte Carlo](./assets/monte_carlo_9_9_fail.png) | ![Q Learning](./assets/q_learning_9_9.png) | ![SARSA](./assets/sarsa_9_9.png) |
 
-The rolling return chart typically shows a sharp improvement phase followed by plateau as the policy converges. SARSA tends to converge to a slightly longer but safer path compared to Q-Learning when walls border the optimal route, which matches the theoretical expectation.
+On a 9x9 grid, Q-Learning and SARSA both converged to the optimal policy while Monte Carlo did not, reflecting TD methods' advantage of learning incrementally from every step rather than waiting until episode end. SARSA's policy changed % chart was noticeably noisier than Q-Learning's before settling -- a direct consequence of its on-policy updates being influenced by exploratory actions, whereas Q-Learning's off-policy target is always the greedy maximum. Both TD methods reached the same final policy; SARSA just took a less stable path to get there.
 
 ---
 
