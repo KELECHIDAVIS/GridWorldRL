@@ -23,7 +23,7 @@ export const LabeledSlider: React.FC<LabeledSliderProps> = ({
   disabled
 }) => {
   return (
-    <div className="w-full mb-6">
+    <div className="w-full mb-2">
       {/* Top Row: Simple divs inherit your index.css font settings */}
       <div className="flex justify-between items-center mb-1">
         <span className="text-[0.85rem]  uppercase tracking-wider opacity-95">

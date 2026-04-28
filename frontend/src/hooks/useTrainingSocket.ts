@@ -12,13 +12,14 @@ export function useTrainingSocket(displaySpeed: number) {
     Record<string, { q_table: number[][][]; policy_changed_pct: number }>
   >({}); // for replay
   const [trainingStatus, setTrainingStatus] = useState<
-    "idle" | "training" | "complete"
+    "idle" | "connecting" | "training" | "complete"
   >("idle");
 
   // refs hold things that shouldnt cause re-renders when they change
   const queueRef = useRef<TrainingUpdate[]>([]); // buffer of incoming messages
   const drainRef = useRef<number | null>(null); // the interval timer id
   const serverDoneRef = useRef(false); // track when the server stops sending messages
+  const firstMessageRef = useRef(false);
 
   // this function is recreated everytime display speed changes (useCallback)
   const drainQueue = useCallback(() => {
@@ -46,10 +47,11 @@ export function useTrainingSocket(displaySpeed: number) {
       // wipe previous run
       queueRef.current = [];
       serverDoneRef.current = false;
+      firstMessageRef.current = false; 
       setEpisodeHistory([]);
       setCurrentUpdate(null);
       setSnapshots({});
-      setTrainingStatus("training");
+      setTrainingStatus("connecting");
 
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
       const wsUrl = apiUrl.replace(/^http/, "ws");
@@ -64,6 +66,10 @@ export function useTrainingSocket(displaySpeed: number) {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === "update") {
+          if (!firstMessageRef.current) {
+            firstMessageRef.current = true;
+            setTrainingStatus("training"); // <-- first message arrived
+          }
           queueRef.current.push(data); // dump into buffer, interval will show it
         }
         if (data.type === "complete") {

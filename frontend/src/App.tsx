@@ -559,9 +559,14 @@ function App() {
 
           {/* Graphs Area: Fills the remaining ~30% */}
           <div className="flex-1 min-h-0 bg-theme-panel">
-            <ResultGraphs
-              episodeHistory={uniqueHistory}
-            />
+            {trainingStatus === "connecting" ? (
+              <div className="h-full flex flex-col items-center justify-center gap-3 text-theme-text opacity-50">
+                <div className="w-7 h-7 border-4 border-theme-border border-t-purple-500 rounded-full animate-spin" />
+                <p className="text-sm">Connecting to server...</p>
+              </div>
+            ) : (
+              <ResultGraphs episodeHistory={uniqueHistory} />
+            )}
           </div>
         </div>
       </div>
