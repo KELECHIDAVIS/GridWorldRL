@@ -11,9 +11,9 @@ export function useTrainingSocket(displaySpeed: number) {
   const [snapshots, setSnapshots] = useState<
     Record<string, { q_table: number[][][]; policy_changed_pct: number }>
   >({}); // for replay
-  const [trainingStatus, setTrainingStatus] = useState<"idle" | "training" | "complete">(
-    "idle",
-  );
+  const [trainingStatus, setTrainingStatus] = useState<
+    "idle" | "training" | "complete"
+  >("idle");
 
   // refs hold things that shouldnt cause re-renders when they change
   const queueRef = useRef<TrainingUpdate[]>([]); // buffer of incoming messages
@@ -25,15 +25,15 @@ export function useTrainingSocket(displaySpeed: number) {
     // every displaySpeed in ms, perform the inner func
     drainRef.current = setInterval(() => {
       if (queueRef.current.length === 0) {
-        // only stop and mark complete if server is also done sending 
-        if (serverDoneRef.current){
-            clearInterval(drainRef.current!)
-            setTrainingStatus('complete')
+        // only stop and mark complete if server is also done sending
+        if (serverDoneRef.current) {
+          clearInterval(drainRef.current!);
+          setTrainingStatus("complete");
         }
         return; // dont read from empty
       }
 
-      const next = queueRef.current.shift()!; // get next episode checkpoint 
+      const next = queueRef.current.shift()!; // get next episode checkpoint
 
       // update the current data so it reflects on the maps and graphs
       setCurrentUpdate(next);
@@ -45,13 +45,15 @@ export function useTrainingSocket(displaySpeed: number) {
     (config: object) => {
       // wipe previous run
       queueRef.current = [];
-      serverDoneRef.current = false ; 
+      serverDoneRef.current = false;
       setEpisodeHistory([]);
       setCurrentUpdate(null);
       setSnapshots({});
       setTrainingStatus("training");
 
-      const ws = new WebSocket("ws://localhost:8000/ws/train");
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const wsUrl = apiUrl.replace(/^http/, "ws");
+      const ws = new WebSocket(`${wsUrl}/ws/train`);
 
       ws.onopen = () => {
         ws.send(JSON.stringify(config));
@@ -86,5 +88,12 @@ export function useTrainingSocket(displaySpeed: number) {
     if (drainRef.current) clearInterval(drainRef.current);
   }, []);
 
-  return { trainingStatus, currentUpdate, episodeHistory, snapshots, connect , reset};
+  return {
+    trainingStatus,
+    currentUpdate,
+    episodeHistory,
+    snapshots,
+    connect,
+    reset,
+  };
 }
