@@ -23,7 +23,7 @@ import { useTrainingSocket } from "./hooks/useTrainingSocket";
 import { applyTrainingUpdate } from "./utils/applyTrainingUpdate";
 import { useSequentialReplay } from "./hooks/useSequentialReplay";
 import { SideBar } from "./Sidebar";
-import { alpha } from "@mui/material";
+
 
 interface TopRowProps {
   selectedAlgo: AlgorithmType;
@@ -363,7 +363,7 @@ function App() {
     (entry, i, arr) => arr.findIndex((e) => e.episode === entry.episode) === i,
   );
 
-  const {activeAgent , status:replayStatus, startReplay, reset:replayReset } = useSequentialReplay(startPos, goalPos,displaySpeed, snapshots , grid); 
+  const {activeAgent ,  startReplay, reset:replayReset } = useSequentialReplay(startPos, goalPos,displaySpeed, snapshots , grid); 
   
   useEffect(() => {
     // if changes to training, start the agent at start then begin training
