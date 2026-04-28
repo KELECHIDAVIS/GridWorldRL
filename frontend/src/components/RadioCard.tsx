@@ -1,6 +1,3 @@
-import React from "react";
-import { Algorithm, type AlgorithmType } from "../types";
-
 // 1. Define the Interface for your props
 export interface RadioCardProps<T> {
   label: string;
