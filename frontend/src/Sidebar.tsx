@@ -25,6 +25,8 @@ interface SideBarProps {
   displaySpeed: number;
   setDisplaySpeed: (speed: number) => void;
   disabled: boolean 
+  alpha:number; 
+  setAlpha:(alpha:number)=>void; 
 }
 export function SideBar({
   epsilon,
@@ -43,7 +45,9 @@ export function SideBar({
   setStepLimit,
   displaySpeed,
   setDisplaySpeed,
-  disabled
+  disabled,
+  alpha,
+  setAlpha
 }: SideBarProps) {
   useEffect(() => {
     // If the number of episodes becomes smaller than our checkpoint interval,
@@ -187,16 +191,27 @@ export function SideBar({
       {/* Gamma Slider (Pink Accent) */}
       <section className="accent-pink">
         <LabeledSlider
-          title="Discount Factor (γ)"
-          value={gamma}
+          title="Learning Rate (α)"
+          value={alpha}
           min={0}
           max={1}
           step={0.05}
-          onChange={setGamma}
+          onChange={setAlpha}
           color="var(--color-pink-300)"
           disabled={disabled}
         />
       </section>
+
+      <LabeledSlider
+        title="Discount Factor (γ)"
+        value={gamma}
+        min={0}
+        max={1}
+        step={0.05}
+        onChange={setGamma}
+        color="var(--color-sky-300)"
+        disabled={disabled}
+      />
 
       {/* Max Steps */}
       <LabeledSlider
@@ -206,23 +221,21 @@ export function SideBar({
         max={2000}
         step={10}
         onChange={setStepLimit}
-        color="var(--color-sky-300)"
+        color="var(--color-pink-300)"
         disabled={disabled}
       />
 
       {/* Checkpoint Slider (Blue Accent) */}
-      <section className="accent-pink">
-        <LabeledSlider
-          title="Check Point Every X EPS "
-          value={checkpointsEvery}
-          min={1}
-          max={numEpisodes}
-          step={1}
-          onChange={setCheckpointsEvery}
-          color="var(--color-pink-300)"
-          disabled={disabled}
-        />
-      </section>
+      <LabeledSlider
+        title="Check Point Every X EPS "
+        value={checkpointsEvery}
+        min={1}
+        max={numEpisodes}
+        step={1}
+        onChange={setCheckpointsEvery}
+        color="var(--color-sky-300)"
+        disabled={disabled}
+      />
     </div>
   );
 }

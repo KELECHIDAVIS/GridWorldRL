@@ -23,6 +23,7 @@ import { useTrainingSocket } from "./hooks/useTrainingSocket";
 import { applyTrainingUpdate } from "./utils/applyTrainingUpdate";
 import { useSequentialReplay } from "./hooks/useSequentialReplay";
 import { SideBar } from "./Sidebar";
+import { alpha } from "@mui/material";
 
 interface TopRowProps {
   selectedAlgo: AlgorithmType;
@@ -345,6 +346,7 @@ function App() {
   const [checkpointsEvery, setCheckpointsEvery] = useState(50);
   const [paintingMode, setPaintingMode] = useState<CellType>("wall");
   const [stepLimit, setStepLimit] = useState(200);
+  const [alpha, setAlpha] = useState(.1)
 
   const [startPos, setStartPos] = useState<[number, number]>([0, 0]);
   const [goalPos, setGoalPos] = useState<[number, number]>([
@@ -435,6 +437,7 @@ function App() {
       start: startPos,
       epsilon,
       gamma,
+      alpha,
       checkpoint_every: checkpointsEvery,
       episodes: numEpisodes,
       algorithm: selectedAlgo,
@@ -538,6 +541,8 @@ function App() {
             displaySpeed={displaySpeed}
             setDisplaySpeed={setDisplaySpeed}
             disabled={isTraining}
+            alpha={alpha}
+            setAlpha={setAlpha}
           />
         </div>
 

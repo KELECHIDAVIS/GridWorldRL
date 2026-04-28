@@ -29,7 +29,7 @@ async def train(websocket: WebSocket):
     env.terminal = tuple(config['terminal'])
     
     start = tuple(config['start'])
-    agent = Agent(env.size, start=start, epsilon=config['epsilon'], gamma=config['gamma'])
+    agent = Agent(env.size, start=start, epsilon=config['epsilon'], gamma=config['gamma'], alpha=config['alpha'])
 
     checkpoint_every = config['checkpoint_every']
     policy_snapshots = {}  # ep number -> policy array
