@@ -1,0 +1,203 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{background:#111113;font-family:var(--font-sans);font-size:13px;color:#e2e0d8;min-height:700px;display:grid;grid-template-rows:44px 1fr auto}
+.topbar{background:#18181b;border-bottom:0.5px solid #2a2a2f;display:flex;align-items:center;padding:0 16px;gap:12px}
+.logo{font-size:13px;font-weight:500;color:#e2e0d8;margin-right:4px}
+.divider{width:0.5px;height:18px;background:#2a2a2f}
+.pill{padding:3px 10px;border-radius:6px;font-size:11px;border:0.5px solid #2a2a2f;color:#888780;cursor:pointer}
+.pill.on{background:#26215C;border-color:#534AB7;color:#CECBF6}
+.btn{padding:4px 12px;border-radius:6px;font-size:11px;border:0.5px solid #2a2a2f;color:#b4b2a9;cursor:pointer;background:transparent}
+.btn.go{background:#3C3489;border-color:#534AB7;color:#EEEDFE}
+.btn.rst{background:#1a1014;border-color:#993C1D;color:#F5C4B3}
+.main{display:grid;grid-template-columns:200px 1fr;overflow:hidden}
+.sidebar{background:#18181b;border-right:0.5px solid #2a2a2f;padding:14px;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.sec-title{font-size:10px;font-weight:500;color:#5F5E5A;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#888780;margin-bottom:5px}
+.val{color:#b4b2a9;font-weight:500}
+input[type=range]{width:100%;accent-color:#7F77DD;height:3px}
+select{width:100%;background:#111113;border:0.5px solid #2a2a2f;border-radius:6px;padding:4px 8px;font-size:11px;color:#b4b2a9}
+.legend{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:#5F5E5A}
+.dot{width:9px;height:9px;border-radius:2px}
+.cp-list{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:10px;font-size:10px;border:0.5px solid}
+.c1{background:#1a0e0a;border-color:#993C1D;color:#F5C4B3}
+.c2{background:#1a1500;border-color:#854F0B;color:#FAC775}
+.c3{background:#041a10;border-color:#0F6E56;color:#9FE1CB}
+.c4{background:#110e2a;border-color:#534AB7;color:#CECBF6}
+.panels{display:grid;grid-template-columns:repeat(3,1fr);background:#111113}
+.panel{border-right:0.5px solid #2a2a2f;display:flex;flex-direction:column}
+.panel:last-child{border-right:none}
+.ph{padding:8px 12px;border-bottom:0.5px solid #2a2a2f;background:#18181b;display:flex;align-items:center;justify-content:space-between}
+.ph-title{font-size:12px;font-weight:500;color:#c2c0b6}
+.tag{font-size:10px;padding:2px 6px;border-radius:4px;background:#1e1e22;color:#5F5E5A;border:0.5px solid #2a2a2f}
+.pb{flex:1;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.grid{display:grid;gap:3px}
+.cell{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.c-wall{background:#222226}
+.c-empty{background:#1e1e22;border:0.5px solid #2a2a2f;color:#444441}
+.c-hot{background:#2a1800;color:#EF9F27}
+.c-warm{background:#1e1400;color:#BA7517}
+.c-cold{background:#0a1828;color:#378ADD}
+.c-cool{background:#0e2030;color:#185FA5}
+.c-start{background:#0a1e16;color:#5DCAA5;border:0.5px solid #0F6E56}
+.c-goal{background:#1a1a0a;color:#97C459;border:0.5px solid #3B6D11}
+.c-arrow{background:#1e1e22;border:0.5px solid #2a2a2f;color:#7F77DD;font-size:15px}
+.c-arrow.best{background:#1a1630;border-color:#534AB7;color:#AFA9EC}
+.hint{font-size:10px;color:#444441}
+.bottom{border-top:0.5px solid #2a2a2f;background:#18181b}
+.tabs{display:flex;border-bottom:0.5px solid #2a2a2f}
+.tab{padding:7px 14px;font-size:11px;color:#5F5E5A;border-bottom:2px solid transparent;cursor:pointer}
+.tab.on{color:#AFA9EC;border-bottom-color:#7F77DD;font-weight:500}
+.tabcontent{padding:10px 16px;display:flex;align-items:center;gap:14px}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:60px}
+.stat-l{font-size:10px;color:#5F5E5A}
+.stat-v{font-size:20px;font-weight:500;color:#c2c0b6}
+.chart-wrap{flex:1;height:56px;background:#111113;border-radius:6px;border:0.5px solid #2a2a2f;position:relative;overflow:hidden}
+.replay-chips{display:flex;gap:5px;align-items:center;margin-left:8px}
+.rbtns{display:flex;gap:4px;margin-left:4px}
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <span class="logo">Grid World</span>
+    <div class="divider"></div>
+    <span class="pill on">Monte Carlo</span>
+    <span class="pill">Sarsa</span>
+    <span class="pill">Q-Learning</span>
+    <div class="divider"></div>
+    <span class="pill on">edit grid</span>
+    <span class="pill">train</span>
+    <div style="margin-left:auto;display:flex;gap:6px">
+      <button class="btn go">Start training</button>
+      <button class="btn rst">Reset</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <div>
+        <div class="sec-title">grid setup</div>
+        <div class="row"><span>size</span><span class="val">6 × 6</span></div>
+        <input type="range" min="3" max="10" value="6" style="margin-bottom:10px">
+        <select style="margin-bottom:8px"><option>painting: wall</option><option>painting: +reward</option><option>painting: -reward</option></select>
+        <div class="legend">
+          <div class="leg"><div class="dot" style="background:#222226"></div>wall</div>
+          <div class="leg"><div class="dot" style="background:#0a1e16;border:0.5px solid #0F6E56"></div>start</div>
+          <div class="leg"><div class="dot" style="background:#1a1a0a;border:0.5px solid #3B6D11"></div>goal</div>
+          <div class="leg"><div class="dot" style="background:#2a1800"></div>+reward</div>
+          <div class="leg"><div class="dot" style="background:#0a1828"></div>-reward</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-title">hyperparameters</div>
+        <div class="row"><span>epsilon (ε)</span><span class="val">0.10</span></div>
+        <input type="range" min="0" max="100" value="10" style="margin-bottom:8px">
+        <div class="row"><span>gamma (γ)</span><span class="val">0.90</span></div>
+        <input type="range" min="0" max="100" value="90" style="margin-bottom:8px">
+        <div class="row"><span>episodes</span><span class="val">500</span></div>
+        <input type="range" min="10" max="1000" value="500">
+      </div>
+
+      <div>
+        <div class="sec-title">checkpoints</div>
+        <div class="row"><span>every</span><input type="number" value="50" style="width:44px;background:#111113;border:0.5px solid #2a2a2f;border-radius:4px;padding:2px 5px;font-size:11px;color:#b4b2a9"><span>episodes</span></div>
+        <div class="cp-list">
+          <div><span class="chip c1">ep 10</span></div>
+          <div><span class="chip c2">ep 50</span></div>
+          <div><span class="chip c3">ep 250</span></div>
+          <div><span class="chip c4">ep 500 (final)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column">
+      <div class="panels">
+        <div class="panel">
+          <div class="ph"><span class="ph-title">Value table Q(s,a)</span><span class="tag">heatmap</span></div>
+          <div class="pb">
+            <div class="grid" style="grid-template-columns:repeat(6,30px)">
+              <div class="cell c-wall"></div><div class="cell c-cold">-.8</div><div class="cell c-cool">-.4</div><div class="cell c-empty">-.1</div><div class="cell c-empty">.0</div><div class="cell c-empty">.1</div>
+              <div class="cell c-cold">-.6</div><div class="cell c-wall"></div><div class="cell c-wall"></div><div class="cell c-warm">.4</div><div class="cell c-hot">.7</div><div class="cell c-empty">.2</div>
+              <div class="cell c-start">S</div><div class="cell c-empty">-.2</div><div class="cell c-empty">.1</div><div class="cell c-warm">.5</div><div class="cell c-wall"></div><div class="cell c-warm">.6</div>
+              <div class="cell c-cold">-.5</div><div class="cell c-empty">-.1</div><div class="cell c-wall"></div><div class="cell c-warm">.4</div><div class="cell c-hot">.8</div><div class="cell c-hot">.9</div>
+              <div class="cell c-empty">.0</div><div class="cell c-empty">.1</div><div class="cell c-empty">.3</div><div class="cell c-wall"></div><div class="cell c-hot">.9</div><div class="cell c-goal">G</div>
+              <div class="cell c-cold">-.3</div><div class="cell c-cold">-.4</div><div class="cell c-empty">.1</div><div class="cell c-warm">.5</div><div class="cell c-hot">.8</div><div class="cell c-hot">.9</div>
+            </div>
+            <span class="hint">blue = low · amber = high value</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><span class="ph-title">Policy π(s)</span><span class="tag">arrows</span></div>
+          <div class="pb">
+            <div class="grid" style="grid-template-columns:repeat(6,30px)">
+              <div class="cell c-wall"></div><div class="cell c-arrow">→</div><div class="cell c-arrow">→</div><div class="cell c-arrow">↓</div><div class="cell c-arrow">↓</div><div class="cell c-arrow">↓</div>
+              <div class="cell c-arrow">↑</div><div class="cell c-wall"></div><div class="cell c-wall"></div><div class="cell c-arrow best">→</div><div class="cell c-arrow best">↓</div><div class="cell c-arrow">↓</div>
+              <div class="cell c-start">S</div><div class="cell c-arrow">↑</div><div class="cell c-arrow best">→</div><div class="cell c-arrow best">→</div><div class="cell c-wall"></div><div class="cell c-arrow best">↓</div>
+              <div class="cell c-arrow">↑</div><div class="cell c-arrow">↑</div><div class="cell c-wall"></div><div class="cell c-arrow">↑</div><div class="cell c-arrow best">→</div><div class="cell c-arrow best">↓</div>
+              <div class="cell c-arrow">↑</div><div class="cell c-arrow">→</div><div class="cell c-arrow">↑</div><div class="cell c-wall"></div><div class="cell c-arrow best">→</div><div class="cell c-goal">G</div>
+              <div class="cell c-arrow">↑</div><div class="cell c-arrow">↑</div><div class="cell c-arrow">↑</div><div class="cell c-arrow best">→</div><div class="cell c-arrow best">→</div><div class="cell c-arrow">↑</div>
+            </div>
+            <span class="hint">purple = greedy path to goal</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph"><span class="ph-title">Snapshot replay</span><span class="tag">live</span></div>
+          <div class="pb">
+            <div class="grid" style="grid-template-columns:repeat(6,30px)">
+              <div class="cell c-wall"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div>
+              <div class="cell c-empty" style="background:#1a1000;border:0.5px solid #854F0B"></div><div class="cell c-wall"></div><div class="cell c-wall"></div><div class="cell c-empty"></div><div class="cell c-empty" style="background:#0e1a0a;border:0.5px solid #3B6D11"></div><div class="cell c-empty"></div>
+              <div class="cell c-start">S</div><div class="cell c-empty" style="background:#110e2a;border:0.5px solid #534AB7"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-wall"></div><div class="cell c-empty"></div>
+              <div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-wall"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div>
+              <div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty" style="background:#1a0e0a;border:0.5px solid #993C1D"></div><div class="cell c-wall"></div><div class="cell c-empty"></div><div class="cell c-goal">G</div>
+              <div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div><div class="cell c-empty"></div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center">
+              <span class="chip c1">● ep 10</span>
+              <span class="chip c2">● ep 50</span>
+              <span class="chip c3">● ep 250</span>
+              <span class="chip c4">● final</span>
+            </div>
+            <div style="display:flex;gap:5px;align-items:center">
+              <button class="btn" style="font-size:11px;padding:3px 8px">⏮</button>
+              <button class="btn go" style="font-size:11px;padding:3px 10px">▶ play</button>
+              <button class="btn" style="font-size:11px;padding:3px 8px">⏭</button>
+              <input type="range" min="1" max="5" value="2" style="width:52px">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="tabs">
+          <div class="tab on">overview</div>
+          <div class="tab">Q-values</div>
+          <div class="tab">exploration</div>
+          <div class="tab">convergence</div>
+        </div>
+        <div class="tabcontent">
+          <div class="stat"><span class="stat-l">episode</span><span class="stat-v">342</span></div>
+          <div class="stat"><span class="stat-l">avg return</span><span class="stat-v">0.74</span></div>
+          <div class="stat"><span class="stat-l">epsilon</span><span class="stat-v">0.08</span></div>
+          <div class="chart-wrap">
+            <svg width="100%" height="56" viewBox="0 0 300 56" preserveAspectRatio="none">
+              <polyline points="0,50 30,48 60,42 90,36 120,28 150,22 180,16 210,13 240,11 270,9 300,8" fill="none" stroke="#534AB7" stroke-width="1.5"/>
+              <polyline points="0,50 30,47 60,40 90,34 120,26 150,21 180,17 210,15 240,14 270,13 300,12" fill="none" stroke="#1D9E75" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="replay-chips">
+            <span style="font-size:10px;color:#5F5E5A">replay:</span>
+            <span class="chip c1">ep 10</span>
+            <span class="chip c2">ep 50</span>
+            <span class="chip c3">ep 250</span>
+            <span class="chip c4">final</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

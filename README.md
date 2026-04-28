@@ -2,9 +2,9 @@
 
 An interactive reinforcement learning visualizer built to make the fundamentals of RL tangible. Train an agent on a customizable grid environment using three classic algorithms and watch the policy and value function evolve in real time.
 
-**[Live Demo](https://your-deployed-site.vercel.app)** <!-- replace with your URL -->
+**[Website](https://grid-world-rl.vercel.app/)**
 
-![Training Demo](./assets/demo.gif) <!-- replace with actual screenshot/gif -->
+![Training Demo](./assets/SpedUpSarsaTraining.gif)
 
 ---
 
@@ -18,7 +18,7 @@ The goal was twofold: to build a solid intuition for how these algorithms actual
 
 ## Algorithms
 
-All three algorithms are implemented from scratch following Sutton & Barto's *Reinforcement Learning: An Introduction* (2nd ed.).
+All three algorithms are implemented from scratch following Sutton & Barto's _Reinforcement Learning: An Introduction_ (2nd ed.).
 
 **Monte Carlo Control** (Chapter 5.3 — On-policy First Visit)
 
@@ -88,12 +88,12 @@ The React app is hosted on Vercel and the FastAPI server on Render. The WebSocke
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React, TypeScript, Tailwind CSS, Recharts |
-| Backend | FastAPI, NumPy |
-| Transport | WebSockets |
-| Hosting | Vercel (frontend), Render (backend) |
+| Layer     | Technology                                |
+| --------- | ----------------------------------------- |
+| Frontend  | React, TypeScript, Tailwind CSS, Recharts |
+| Backend   | FastAPI, NumPy                            |
+| Transport | WebSockets                                |
+| Hosting   | Vercel (frontend), Render (backend)       |
 
 ---
 
@@ -137,12 +137,13 @@ The app will be available at `http://localhost:5173`.
 
 ## Results
 
-Below are example runs showing the policy and value function at different stages of training on a $7 \times 7$ grid with walls.
+Below are example runs showing the convergence results for all three algorithms on a $9 \times 9$ grid with walls. Monte Carlo failed where the other two converged to an optimal solution.
 
 <!-- Add screenshots here -->
-| Early Training | Mid Training | Converged |
-|---|---|---|
-| ![early](./assets/early.png) | ![mid](./assets/mid.png) | ![converged](./assets/converged.png) |
+
+| Monte Carlo                                       | Q Learning                                 | SARSA                            |
+| ------------------------------------------------- | ------------------------------------------ | -------------------------------- |
+| ![Monte Carlo](./assets/monte_carlo_9_9_fail.png) | ![Q Learning](./assets/q_learning_9_9.png) | ![SARSA](./assets/sarsa_9_9.png) |
 
 The rolling return chart typically shows a sharp improvement phase followed by plateau as the policy converges. SARSA tends to converge to a slightly longer but safer path compared to Q-Learning when walls border the optimal route, which matches the theoretical expectation.
 
@@ -150,4 +151,4 @@ The rolling return chart typically shows a sharp improvement phase followed by p
 
 ## References
 
-- Sutton, R. S., & Barto, A. G. (2018). *Reinforcement Learning: An Introduction* (2nd ed.). MIT Press. — [free PDF](http://incompleteideas.net/book/the-book-2nd.html)
+- Sutton, R. S., & Barto, A. G. (2018). _Reinforcement Learning: An Introduction_ (2nd ed.). MIT Press. — [free PDF](http://incompleteideas.net/book/the-book-2nd.html)
