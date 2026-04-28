@@ -9,7 +9,7 @@ export function useTrainingSocket(displaySpeed: number) {
   ); // for heat maps
   const [episodeHistory, setEpisodeHistory] = useState<TrainingUpdate[]>([]); // for graphs
   const [snapshots, setSnapshots] = useState<
-    Record<string, { policy: number[][][]; policy_changed_pct: number }>
+    Record<string, { q_table: number[][][]; policy_changed_pct: number }>
   >({}); // for replay
   const [trainingStatus, setTrainingStatus] = useState<"idle" | "training" | "complete">(
     "idle",

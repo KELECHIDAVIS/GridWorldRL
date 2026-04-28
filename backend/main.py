@@ -1,6 +1,9 @@
 from fastapi import FastAPI, WebSocket
 from environment import Agent, Environment, IntEnum
 from algorithms.monte_carlo import monte_carlo
+from algorithms.sarsa import sarsa
+from algorithms.q_learning import   q_learning
+
 import numpy as np 
 from pydantic import BaseModel
 from collections import deque
@@ -12,6 +15,8 @@ class StateAction(BaseModel):
 
 class Algorithm(IntEnum):
     MONTE_CARLO = 0 
+    Q_LEARNING = 1 
+    SARSA = 2
 
 @app.websocket('/ws/train')
 async def train(websocket: WebSocket):
@@ -42,7 +47,11 @@ async def train(websocket: WebSocket):
         visit_counts = [[]]
         episode_length = 0 
         if config['algorithm'] == Algorithm.MONTE_CARLO:
-            G, episode_length, visit_counts, policy_changed_pct = monte_carlo(env, agent, config['step_limit'])
+            G, episode_length, policy_changed_pct = monte_carlo(env, agent, config['step_limit'])
+        elif config['algorithm'] == Algorithm.Q_LEARNING:
+            G, episode_length, policy_changed_pct = q_learning(env, agent, config['step_limit'])
+        elif config['algorithm'] == Algorithm.SARSA:
+            G, episode_length, policy_changed_pct = sarsa(env, agent, config['step_limit'])
 
         
             
@@ -54,7 +63,7 @@ async def train(websocket: WebSocket):
         # save snapshot at checkpoints
         if episode % checkpoint_every == 0 or episode == config['episodes']- 1:
             policy_snapshots[episode] = {
-                "policy": agent.policy.tolist(),
+                "q_table":agent.q_table.tolist(),
                 "policy_changed_pct": policy_changed_pct
             }
             
@@ -63,10 +72,8 @@ async def train(websocket: WebSocket):
                 'type': 'update',
                 'episode': episode,
                 'q_table': agent.q_table.tolist(),
-                'policy': agent.policy.tolist(),
                 'episode_return': G,
                 'policy_changed_pct': policy_changed_pct,
-                'visit_counts': visit_counts.tolist(),
                 'episode_length': episode_length, 
                 'rolling_return':rolling_avg
             })

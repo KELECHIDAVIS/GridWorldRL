@@ -1,13 +1,12 @@
 import { useCallback, useRef, useState } from "react";
 import type { GridData, ReplayAgent } from "../types";
 
-const AGENT_COLORS = ["#a78bfa", "#34d399", "#fb923c", "#60a5fa", "#f472b6"];
 const ROW_DELTAS = [-1, 0, 1, 0]; // 0=up 1=right 2=down 3=left
 const COL_DELTAS = [0, 1, 0, -1];
 
 type ReplaySnapshot = {
   episode: number;
-  policy: number[][][];
+  q_table: number[][][];
   policy_changed_pct: number;
 };
 
@@ -16,18 +15,22 @@ type ReplaySnapshot = {
  * p: progress from 0.0 to 1.0
  */
 function getProgressColor(p: number): string {
-  // Hue: 270 (Purple) -> 405 (which is 45° Orange, but we go 
+  // Hue: 270 (Purple) -> 405 (which is 45° Orange, but we go
   // clockwise for a smoother transition through pinks/reds)
-  const h = 270 + p * 135; 
-  const s = 50 + p * 40;   // 50% -> 90% (gets more vivid)
-  const l = 30 + p * 30;   // 30% -> 60% (gets brighter)
-  
+  const h = 270 + p * 135;
+  const s = 50 + p * 40; // 50% -> 90% (gets more vivid)
+  const l = 30 + p * 30; // 30% -> 60% (gets brighter)
+
   return `hsl(${h % 360}, ${s}%, ${l}%)`;
 }
 
-function stepAgent(agent: ReplayAgent, goalPos: [number, number], grid:GridData): ReplayAgent {
+function stepAgent(
+  agent: ReplayAgent,
+  goalPos: [number, number],
+  grid: GridData,
+): ReplayAgent {
   const [r, c] = agent.pos;
-  const actions = agent.policy[r]?.[c];
+  const actions = agent.q_table[r]?.[c];
 
   if (!actions) return { ...agent, done: true };
 
@@ -41,10 +44,16 @@ function stepAgent(agent: ReplayAgent, goalPos: [number, number], grid:GridData)
 
   let newR = r + ROW_DELTAS[bestAction];
   let newC = c + COL_DELTAS[bestAction];
-  const gridSize = agent.policy.length;
+  const gridSize = agent.q_table.length;
 
-  // if the agent runs into a wall, it should keep them in the same pos 
-  if ((newR < 0 || newR >= gridSize || newC < 0 || newC >= gridSize) || grid[newR][newC].type == 'wall') {
+  // if the agent runs into a wall, it should keep them in the same pos
+  if (
+    newR < 0 ||
+    newR >= gridSize ||
+    newC < 0 ||
+    newC >= gridSize ||
+    grid[newR][newC].type == "wall"
+  ) {
     newR = r;
     newC = c;
   }
@@ -74,9 +83,9 @@ export function useSequentialReplay(
   displaySpeed: number,
   snapshots: Record<
     string,
-    { policy: number[][][]; policy_changed_pct: number }
+    { q_table : number[][][]; policy_changed_pct: number }
   >,
-  grid:GridData
+  grid: GridData,
 ) {
   const intervalRef = useRef<number | null>(null);
   const queueRef = useRef<ReplaySnapshot[]>([]);
@@ -107,7 +116,7 @@ export function useSequentialReplay(
       id: next.episode,
       pos: [...startPos] as [number, number],
       color: assignedColor, // <--- Dynamic Color!
-      policy: next.policy,
+      q_table: next.q_table,
       steps: 0,
       done: false,
       visited: new Set([`${startPos[0]},${startPos[1]}`]),
@@ -125,10 +134,10 @@ export function useSequentialReplay(
 
     const ordered = entries
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
-      
+
       .map(([ep, snap]) => ({
         episode: parseInt(ep),
-        policy: snap.policy,
+        q_table: snap.q_table,
         policy_changed_pct: snap.policy_changed_pct,
       }));
 

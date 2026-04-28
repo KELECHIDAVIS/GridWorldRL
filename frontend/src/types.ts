@@ -31,7 +31,6 @@ export type GridData = CellData[][]; // [row][col]
 export interface TrainingUpdate {
   episode: number;
   q_table: number[][][]; // [row][col][action]
-  policy: number[][][]; // [row][col][action]
   episode_return: number; // chart 1
   policy_changed_pct: number; // for chart 2 -- compute this in Python
   visit_counts: number[][][]; // for chart 3 -- reset each episode
@@ -45,8 +44,8 @@ export type ReplayAgent = {
   id: number; // episode number
   pos: [number, number];
   color: string;
-  policy: number[][][];
+  q_table: number[][][];
   steps: number;
   done: boolean;
-  visited:Set<string> // for catching cycles 
+  visited: Set<string>; // for catching cycles
 };

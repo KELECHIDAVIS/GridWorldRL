@@ -11,21 +11,24 @@ class Action (IntEnum):
 
 possible_actions = list(range(len(Action)))
 class Agent():
-    def __init__(self , env_size,  start= (0,0), epsilon = .01, gamma=1):
+    def __init__(self , env_size,  start= (0,0), epsilon = .01, gamma=1, alpha=.1):
         self.state  = start 
         self.q_table= np.zeros((env_size, env_size, len(possible_actions))) 
         self.returns= np.zeros((env_size, env_size, len(possible_actions)))
         self.returns_count = np.zeros((env_size, env_size, len(possible_actions)))
-        self.policy = np.full((env_size, env_size, len(possible_actions)), 1.0/len(possible_actions)) # each action has a certain prob to be picked in each state. initially random policy (every action equally probable)
         self.gamma = gamma
         self.epsilon = epsilon
+        self.alpha = alpha # used for the td methods 
     #based on policy for probabilities of the action at that state, return the action chosen 
-    #TODO: can make episilon soft and greedy versions later; the book says pick a from state derived from Q (e.g., episilon - greedy ) so the choice could be arbitrary
-    def get_action(self): 
-        row, col = self.state 
-        #the probs should sum to one 
-        action = np.random.choice( possible_actions, p=self.policy[row, col] )
-        return action 
+    
+    #epsilon greedy 
+    def get_action (self)   :
+        row, col = self.state
+        
+        if np.random.random() < self.epsilon:
+            return np.random.choice (possible_actions)
+        return int(np.argmax(self.q_table[row,col])) #pick greedy choice 
+        
     
     #based on its state and the environment it's in, get action, take action, update state and reward 
     #when doing the policy iteration, we will build a list of these actions and rewards  
